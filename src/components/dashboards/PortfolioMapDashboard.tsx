@@ -49,11 +49,11 @@ export function PortfolioMapDashboard({ properties, t, currency, locale, openAdd
         >
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 shrink-0">
                 <div>
-                    <h1 className="text-2xl sm:text-3xl font-outfit font-bold text-white mb-1.5 flex items-center gap-3">
-                        <MapIcon className="text-blue-500" size={24} />
+                    <h1 className="text-xl sm:text-3xl font-outfit font-bold text-white mb-1 flex items-center gap-2 sm:gap-3">
+                        <MapIcon className="text-blue-500" size={20} />
                         {t("portfolioMapHeader")}
                     </h1>
-                    <p className="text-slate-400 text-xs sm:text-sm">{t("portfolioMapSubtext")}</p>
+                    <p className="text-slate-400 text-[10px] sm:text-sm">{t("portfolioMapSubtext")}</p>
                 </div>
 
                 <div className="flex items-center gap-4 bg-slate-900/40 p-1.5 rounded-xl border border-slate-700/50 backdrop-blur-md shadow-xl overflow-x-auto no-scrollbar">
@@ -140,8 +140,8 @@ export function PortfolioMapDashboard({ properties, t, currency, locale, openAdd
 
                             {/* Unpinned Assets Overlay */}
                             {viewMode === "map" && unpinnedAssets.length > 0 && !pinAsset && (
-                                <div className="absolute right-4 top-4 bottom-4 w-72 z-50 pointer-events-none">
-                                    <div className="bg-slate-900/90 backdrop-blur-xl border border-slate-700/50 rounded-2xl shadow-2xl flex flex-col h-full pointer-events-auto overflow-hidden">
+                                <div className="absolute right-0 sm:right-4 bottom-0 sm:top-4 sm:bottom-4 w-full sm:w-72 z-50 pointer-events-none p-4 sm:p-0">
+                                    <div className="bg-slate-900/95 backdrop-blur-xl border border-slate-700/50 rounded-2xl shadow-2xl flex flex-col max-h-[40vh] sm:h-full pointer-events-auto overflow-hidden">
                                         <div className="p-4 border-b border-slate-800 flex items-center justify-between">
                                             <h3 className="text-sm font-bold text-white flex items-center gap-2">
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-amber-400"><path d="M12 2a10 10 0 1 0 10 10 10 10 0 0 0-10-10zm0 16a1 1 0 1 1 0-2 1 1 0 0 1 0 2zm1-5.07V14h-2v-1.07c0-2 3-2 3-3.93A1.93 1.93 0 0 0 12 7a1.93 1.93 0 0 0-1.93 2H8.14A3.93 3.93 0 1 1 12 11.07z" /></svg>

@@ -80,14 +80,14 @@ export function RealEstateDashboard({
         >
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-3xl font-outfit font-bold text-white mb-1.5 flex items-center gap-3">
+                    <h1 className="text-2xl sm:text-3xl font-outfit font-bold text-white mb-1.5 flex flex-wrap items-center gap-2 sm:gap-3">
                         {t("dashboardHeader")}
-                        <div className="flex items-center gap-2 bg-slate-900/50 border border-slate-700/50 rounded-full px-3 py-1 scale-95 origin-left">
+                        <div className="flex items-center gap-2 bg-slate-900/50 border border-slate-700/50 rounded-full px-3 py-1 scale-90 sm:scale-95 origin-left">
                             <Clock size={12} className="text-blue-400" />
                             <span className="text-[10px] font-bold text-slate-300 tracking-wider uppercase">{currentTime} LIVE</span>
                         </div>
                     </h1>
-                    <p className="text-slate-400 text-sm">{t("dashboardSubtext")} <span className="text-emerald-400 font-medium">12.4%</span> {t("thisQuarter")}</p>
+                    <p className="text-slate-400 text-xs sm:text-sm">{t("dashboardSubtext")} <span className="text-emerald-400 font-medium">12.4%</span> {t("thisQuarter")}</p>
                 </div>
             </div>
 
@@ -157,7 +157,7 @@ export function RealEstateDashboard({
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="lg:col-span-2 glass-card rounded-2xl p-6 border border-slate-700/30">
+                <div className="lg:col-span-2 glass-card rounded-2xl p-4 sm:p-6 border border-slate-700/30">
                     <div className="flex items-center justify-between mb-6">
                         <h2 className="text-lg font-outfit font-semibold text-white">{t("portfolioValueTime")}</h2>
                         <div className="flex gap-2">
@@ -199,7 +199,7 @@ export function RealEstateDashboard({
                     </div>
                 </div>
 
-                <div className="glass-card rounded-2xl p-6 border border-slate-700/30 flex flex-col">
+                <div className="glass-card rounded-2xl p-4 sm:p-6 border border-slate-700/30 flex flex-col">
                     <div className="flex items-center justify-between mb-6">
                         <h2 className="text-lg font-outfit font-semibold text-white">{t("activePipeline")}</h2>
                         <button
@@ -261,7 +261,7 @@ export function RealEstateDashboard({
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Mini Map Section */}
-                <div className="glass-card rounded-2xl border border-slate-700/30 overflow-hidden flex flex-col min-h-[400px]">
+                <div className="glass-card rounded-2xl border border-slate-700/30 overflow-hidden flex flex-col min-h-[350px] sm:min-h-[400px]">
                     <div className="p-6 border-b border-slate-800/40 flex items-center justify-between">
                         <div>
                             <h2 className="text-lg font-outfit font-semibold text-white flex items-center gap-2">
