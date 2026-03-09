@@ -62,18 +62,45 @@ export function SharePortfolioModal({ isOpen, onClose }: SharePortfolioModalProp
         }
     };
 
-    const handleSendEmail = () => {
-        if (!recipientEmail) return;
+    const handleSendEmail = async () => {
+        if (!recipientEmail || !user) return;
         setIsSending(true);
-        setTimeout(() => {
+
+        try {
+            const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://follio.app';
+            const shareUrl = `${baseUrl}/share/p/${user.id}${portfolioName ? `?name=${encodeURIComponent(portfolioName)}` : ''}`;
+
+            const response = await fetch('/api/notifications', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    to: recipientEmail,
+                    subject: emailSubject || `${user.fullName || 'User'} shared a portfolio with you`,
+                    title: portfolioName || "Shared Real Estate Portfolio",
+                    message: emailMessage || `Hi! I'm sharing my real estate portfolio with you via Follio. You can view the live dashboard and map by clicking the link below.`,
+                    actionText: "View Portfolio",
+                    actionUrl: shareUrl
+                })
+            });
+
+            if (response.ok) {
+                setIsSent(true);
+                setTimeout(() => {
+                    setIsSent(false);
+                    setRecipientEmail("");
+                    setEmailMessage("");
+                }, 3000);
+            } else {
+                const errData = await response.json();
+                console.error("Email send error:", errData);
+                alert("Failed to send email. Ensure your Resend API key is configured.");
+            }
+        } catch (error) {
+            console.error("Failed to send share email:", error);
+            alert("An error occurred while sending the email.");
+        } finally {
             setIsSending(false);
-            setIsSent(true);
-            setTimeout(() => {
-                setIsSent(false);
-                setRecipientEmail("");
-                setEmailMessage("");
-            }, 3000);
-        }, 1500);
+        }
     };
 
     return (

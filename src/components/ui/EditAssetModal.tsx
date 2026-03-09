@@ -242,7 +242,7 @@ export function EditAssetModal({ isOpen, onClose, property, onUpdate, onRemove }
                                                 />
                                             </div>
                                             <div className="space-y-2">
-                                                <label className="text-xs font-black text-slate-500 uppercase tracking-widest">Bedrooms</label>
+                                                <label className="text-xs font-black text-slate-500 uppercase tracking-widest">{t("bedrooms")}</label>
                                                 <input
                                                     type="number"
                                                     className="w-full bg-slate-950/50 border border-slate-700/40 rounded-xl px-4 py-3 text-slate-200 focus:outline-none focus:border-blue-500/50 transition-all font-medium"
@@ -251,7 +251,7 @@ export function EditAssetModal({ isOpen, onClose, property, onUpdate, onRemove }
                                                 />
                                             </div>
                                             <div className="space-y-2">
-                                                <label className="text-xs font-black text-slate-500 uppercase tracking-widest">Bathrooms</label>
+                                                <label className="text-xs font-black text-slate-500 uppercase tracking-widest">{t("bathrooms")}</label>
                                                 <input
                                                     type="number"
                                                     step="0.5"
@@ -261,7 +261,7 @@ export function EditAssetModal({ isOpen, onClose, property, onUpdate, onRemove }
                                                 />
                                             </div>
                                             <div className="space-y-2">
-                                                <label className="text-xs font-black text-slate-500 uppercase tracking-widest">Year Built</label>
+                                                <label className="text-xs font-black text-slate-500 uppercase tracking-widest">{t("yearBuilt")}</label>
                                                 <input
                                                     type="number"
                                                     className="w-full bg-slate-950/50 border border-slate-700/40 rounded-xl px-4 py-3 text-slate-200 focus:outline-none focus:border-blue-500/50 transition-all font-medium"
@@ -270,7 +270,7 @@ export function EditAssetModal({ isOpen, onClose, property, onUpdate, onRemove }
                                                 />
                                             </div>
                                             <div className="space-y-2">
-                                                <label className="text-xs font-black text-slate-500 uppercase tracking-widest">Lot Size</label>
+                                                <label className="text-xs font-black text-slate-500 uppercase tracking-widest">{t("lotSize")}</label>
                                                 <input
                                                     className="w-full bg-slate-950/50 border border-slate-700/40 rounded-xl px-4 py-3 text-slate-200 focus:outline-none focus:border-blue-500/50 transition-all font-medium"
                                                     value={formData.lotSize || ""}
@@ -278,7 +278,7 @@ export function EditAssetModal({ isOpen, onClose, property, onUpdate, onRemove }
                                                 />
                                             </div>
                                             <div className="space-y-2 md:col-span-2">
-                                                <label className="text-xs font-black text-slate-500 uppercase tracking-widest">Description</label>
+                                                <label className="text-xs font-black text-slate-500 uppercase tracking-widest">{t("description")}</label>
                                                 <textarea
                                                     className="w-full bg-slate-950/50 border border-slate-700/40 rounded-xl px-4 py-3 text-slate-200 focus:outline-none focus:border-blue-500/50 transition-all font-medium min-h-[100px]"
                                                     value={formData.description || ""}
@@ -346,7 +346,7 @@ export function EditAssetModal({ isOpen, onClose, property, onUpdate, onRemove }
                                             </div>
                                         </div>
                                         <div className="space-y-2">
-                                            <label className="text-xs font-black text-slate-500 uppercase tracking-widest">Monthly Debt Service (P+I)</label>
+                                            <label className="text-xs font-black text-slate-500 uppercase tracking-widest">{t("monthlyDebtService")}</label>
                                             <div className="relative">
                                                 <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-600">$</span>
                                                 <input
@@ -358,7 +358,7 @@ export function EditAssetModal({ isOpen, onClose, property, onUpdate, onRemove }
                                             </div>
                                         </div>
                                         <div className="space-y-2">
-                                            <label className="text-xs font-black text-slate-500 uppercase tracking-widest">Monthly Principal Payment</label>
+                                            <label className="text-xs font-black text-slate-500 uppercase tracking-widest">{t("monthlyPrincipalPayment")}</label>
                                             <div className="relative">
                                                 <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-600">$</span>
                                                 <input
@@ -485,7 +485,7 @@ export function EditAssetModal({ isOpen, onClose, property, onUpdate, onRemove }
                         <div className="p-6 border-t border-slate-800 bg-slate-900/50 backdrop-blur-xl flex justify-between items-center">
                             {isDeleting ? (
                                 <div className="flex items-center gap-3 animate-in fade-in slide-in-from-left-2 duration-300">
-                                    <span className="text-xs font-bold text-rose-500 uppercase tracking-widest">Permanent delete?</span>
+                                    <span className="text-xs font-bold text-rose-500 uppercase tracking-widest">{t("permanentDelete")}</span>
                                     <button
                                         onClick={() => {
                                             onRemove?.(property.id);
@@ -493,7 +493,7 @@ export function EditAssetModal({ isOpen, onClose, property, onUpdate, onRemove }
                                         }}
                                         className="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white rounded-xl text-xs font-bold transition-all shadow-lg shadow-rose-500/20"
                                     >
-                                        Yes, Delete
+                                        {t("confirmDeleteAction")}
                                     </button>
                                     <button
                                         onClick={() => setIsDeleting(false)}
@@ -512,7 +512,7 @@ export function EditAssetModal({ isOpen, onClose, property, onUpdate, onRemove }
                                     }}
                                     className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold text-rose-500 hover:text-white hover:bg-rose-500/20 transition-all border border-transparent hover:border-rose-500/30"
                                 >
-                                    <Trash2 size={16} /> Delete Asset
+                                    <Trash2 size={16} /> {t("deleteAsset")}
                                 </button>
                             )}
                             <div className="flex gap-3">

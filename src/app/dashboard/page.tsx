@@ -226,15 +226,15 @@ function DashboardContent() {
 
     healthScore = Math.max(0, Math.min(100, Math.round(healthScore)));
 
-    let healthStatus = "Excellent";
+    let healthStatus = t("healthExcellent");
     let healthColor = "text-emerald-400";
     let bgHealthColor = "bg-emerald-400";
     if (healthScore < 50) {
-        healthStatus = "At Risk";
+        healthStatus = t("healthAtRisk");
         healthColor = "text-rose-400";
         bgHealthColor = "bg-rose-400";
     } else if (healthScore < 75) {
-        healthStatus = "Fair";
+        healthStatus = t("healthFair");
         healthColor = "text-amber-400";
         bgHealthColor = "bg-amber-400";
     }

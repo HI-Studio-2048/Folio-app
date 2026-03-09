@@ -103,15 +103,15 @@ export function RealEstateDashboard({
                             <Activity size={18} />
                         </div>
                         <div>
-                            <p className="text-sm font-bold text-white">Viewing Demo Portfolio</p>
-                            <p className="text-xs text-slate-400">You are currently viewing sample data. Add your first own asset to start your real portfolio.</p>
+                            <p className="text-sm font-bold text-white">{t("viewingDemo")}</p>
+                            <p className="text-xs text-slate-400">{t("demoDataDesc")}</p>
                         </div>
                     </div>
                     <button
                         onClick={openAddModal}
                         className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition-all shadow-lg shadow-blue-500/20 whitespace-nowrap"
                     >
-                        + Add Real Asset
+                        {t("addRealAsset")}
                     </button>
                 </motion.div>
             )}
@@ -119,9 +119,9 @@ export function RealEstateDashboard({
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
                 <StatCard
                     title={t("totalPropertyValue")}
-                    supertext={`Projected with Pipeline: ${formatCurrency(stats.projectedTotalValue, currency, locale)}`}
+                    supertext={`${t("projectedWithPipeline")}: ${formatCurrency(stats.projectedTotalValue, currency, locale)}`}
                     value={formatCurrency(stats.totalValue, currency, locale)}
-                    subtext={`30-day Liquidation: ${formatCurrency(stats.totalValue * 0.8, currency, locale)}`}
+                    subtext={`${t("liquidation30Day")}: ${formatCurrency(stats.totalValue * 0.8, currency, locale)}`}
                     trend="+5.2%"
                     icon={Building2}
                     color="text-blue-400"
@@ -129,7 +129,7 @@ export function RealEstateDashboard({
                 />
                 <StatCard
                     title={t("totalEquity")}
-                    supertext={`Projected with Pipeline: ${formatCurrency(stats.projectedEquity, currency, locale)}`}
+                    supertext={`${t("projectedWithPipeline")}: ${formatCurrency(stats.projectedEquity, currency, locale)}`}
                     value={formatCurrency(stats.equity, currency, locale)}
                     trend="+8.1%"
                     icon={PieChart}
@@ -138,7 +138,7 @@ export function RealEstateDashboard({
                 />
                 <StatCard
                     title={t("totalDebt")}
-                    supertext={`Projected with Pipeline: ${formatCurrency(stats.projectedTotalDebt, currency, locale)}`}
+                    supertext={`${t("projectedWithPipeline")}: ${formatCurrency(stats.projectedTotalDebt, currency, locale)}`}
                     value={formatCurrency(stats.totalDebt, currency, locale)}
                     trend="-2.4%"
                     icon={TrendingUp}
@@ -148,7 +148,7 @@ export function RealEstateDashboard({
                 />
                 <StatCard
                     title={t("monthlyCashflow")}
-                    supertext={`Projected with Pipeline: ${formatCurrency(stats.projectedMonthlyCashflow, currency, locale)}`}
+                    supertext={`${t("projectedWithPipeline")}: ${formatCurrency(stats.projectedMonthlyCashflow, currency, locale)}`}
                     value={formatCurrency(stats.monthlyCashflow, currency, locale)}
                     trend="+14.5%"
                     icon={BarChart3}
@@ -242,7 +242,7 @@ export function RealEstateDashboard({
                                 <button
                                     onClick={(e) => { e.stopPropagation(); removeProperty?.(prop.id); }}
                                     className="absolute top-2 right-2 p-1.5 bg-rose-500/10 text-rose-400 rounded-md opacity-0 group-hover:opacity-100 transition-opacity hover:bg-rose-500/20"
-                                    title="Remove Asset"
+                                    title={t("removeAsset")}
                                 >
                                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /><line x1="10" x2="10" y1="11" y2="17" /><line x1="14" x2="14" y1="11" y2="17" /></svg>
                                 </button>

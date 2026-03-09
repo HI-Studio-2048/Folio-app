@@ -1,15 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, use } from "react";
 import { RealEstateDashboard } from "@/components/dashboards/RealEstateDashboard";
-import { MOCK_PROPERTIES, getPortfolioStats, Property } from "@/lib/data";
+import { getPortfolioStats, Property } from "@/lib/data";
 import { useSettings } from "@/components/ui/settings-provider";
 import { LayoutDashboard } from "lucide-react";
 import { motion } from "framer-motion";
 import { PortfolioMapDashboard } from "@/components/dashboards/PortfolioMapDashboard";
-import { supabaseService } from "@/lib/supabase-service";
 
-export default function SharedPortfolioPage({ params }: { params: { id: string } }) {
+export default function SharedPortfolioPage({ params }: { params: Promise<{ id: string }> }) {
+    const { id: userId } = use(params);
     const { t, currency, locale } = useSettings();
     const [properties, setProperties] = useState<Property[]>([]);
     const [activeTab, setActiveTab] = useState("dashboard");
@@ -17,39 +17,56 @@ export default function SharedPortfolioPage({ params }: { params: { id: string }
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        if (typeof window !== "undefined") {
-            const params = new URLSearchParams(window.location.search);
-            const nameParam = params.get("name");
-            if (nameParam) {
-                setSharedName(nameParam);
-            }
-        }
-    }, []);
-
-    useEffect(() => {
         const fetchSharedData = async () => {
+            if (!userId) {
+                setIsLoading(false);
+                return;
+            }
+
             setIsLoading(true);
             try {
-                // In this app, we are using the user_id as the sharing ID for now
-                const data = await supabaseService.getProperties(params.id);
-                if (data && data.length > 0) {
-                    setProperties(data);
+                // 1. Handle URL name override
+                const urlParams = new URLSearchParams(window.location.search);
+                const nameParam = urlParams.get("name");
+                if (nameParam) {
+                    setSharedName(nameParam);
+                }
+
+                // 2. Fetch via Server-side API to bypass RLS and handle schema issues
+                const response = await fetch(`/api/share/p/${userId}`);
+                const result = await response.json();
+
+                if (response.ok && result.properties) {
+                    // Map database fields to frontend fields
+                    const mapped = result.properties.map((dbProp: any) => ({
+                        id: dbProp.id,
+                        name: dbProp.name,
+                        address: dbProp.address,
+                        status: dbProp.status,
+                        type: dbProp.type,
+                        image: dbProp.image,
+                        lat: dbProp.lat,
+                        lng: dbProp.lng,
+                        financials: dbProp.financials || {},
+                        acquisitionDate: dbProp.acquisition_date,
+                        events: dbProp.events || [],
+                        isDemo: false
+                    }));
+                    setProperties(mapped);
                 } else {
-                    // Fallback to mocks if no real data yet, or show empty
-                    setProperties(MOCK_PROPERTIES);
+                    console.error("Shared Fetch Error Response:", result);
+                    setProperties([]);
                 }
             } catch (error) {
                 console.error("Error fetching shared portfolio:", error);
-                setProperties(MOCK_PROPERTIES);
+                setProperties([]);
             } finally {
                 setIsLoading(false);
             }
         };
 
-        if (params.id) {
-            fetchSharedData();
-        }
-    }, [params.id]);
+        fetchSharedData();
+    }, [userId]);
 
     const stats = getPortfolioStats(properties);
 

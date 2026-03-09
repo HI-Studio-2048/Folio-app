@@ -554,7 +554,7 @@ export function AddAssetModal({ isOpen, onClose, onAddAssets, initialStatus }: A
 
                                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 md:col-span-2 mt-2">
                                             <div className="space-y-2">
-                                                <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Bedrooms</label>
+                                                <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">{t("bedrooms")}</label>
                                                 <input
                                                     type="number"
                                                     className="w-full bg-slate-950/50 border border-slate-700/50 rounded-lg px-4 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-blue-500/50"
@@ -564,7 +564,7 @@ export function AddAssetModal({ isOpen, onClose, onAddAssets, initialStatus }: A
                                                 />
                                             </div>
                                             <div className="space-y-2">
-                                                <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Bathrooms</label>
+                                                <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">{t("bathrooms")}</label>
                                                 <input
                                                     type="number"
                                                     step="0.5"
@@ -575,7 +575,7 @@ export function AddAssetModal({ isOpen, onClose, onAddAssets, initialStatus }: A
                                                 />
                                             </div>
                                             <div className="space-y-2">
-                                                <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Year Built</label>
+                                                <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">{t("yearBuilt")}</label>
                                                 <input
                                                     type="number"
                                                     className="w-full bg-slate-950/50 border border-slate-700/50 rounded-lg px-4 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-blue-500/50"
@@ -585,7 +585,7 @@ export function AddAssetModal({ isOpen, onClose, onAddAssets, initialStatus }: A
                                                 />
                                             </div>
                                             <div className="space-y-2">
-                                                <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Lot Size</label>
+                                                <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">{t("lotSize")}</label>
                                                 <input
                                                     type="text"
                                                     className="w-full bg-slate-950/50 border border-slate-700/50 rounded-lg px-4 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-blue-500/50"
@@ -597,7 +597,7 @@ export function AddAssetModal({ isOpen, onClose, onAddAssets, initialStatus }: A
                                         </div>
 
                                         <div className="pt-4 md:col-span-2 border-t border-slate-800 mt-4">
-                                            <h3 className="text-sm font-semibold text-slate-200 mb-4">Property Image</h3>
+                                            <h3 className="text-sm font-semibold text-slate-200 mb-4">{t("propertyInfo")}</h3>
                                             <div className="flex flex-col sm:flex-row gap-4 items-start bg-slate-950/40 p-4 rounded-xl border border-slate-800/40">
                                                 <div className="w-full sm:w-32 h-32 rounded-xl border border-slate-700 bg-slate-950/50 overflow-hidden shrink-0">
                                                     <img
@@ -610,7 +610,7 @@ export function AddAssetModal({ isOpen, onClose, onAddAssets, initialStatus }: A
                                                     />
                                                 </div>
                                                 <div className="flex-1 space-y-2 w-full">
-                                                    <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Image URL</label>
+                                                    <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">{t("propertyImage")}</label>
                                                     <input
                                                         type="text"
                                                         className="w-full bg-slate-950/50 border border-slate-700/50 rounded-lg px-4 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all placeholder:text-slate-600 font-mono text-[11px]"
@@ -706,24 +706,24 @@ export function AddAssetModal({ isOpen, onClose, onAddAssets, initialStatus }: A
                                                     exit={{ opacity: 0, height: 0, overflow: 'hidden' }}
                                                     className="pt-6 border-t border-slate-800"
                                                 >
-                                                    <h3 className="text-sm font-semibold text-slate-200 mb-4">Debt Specifics</h3>
+                                                    <h3 className="text-sm font-semibold text-slate-200 mb-4">{t("debtSpecifics")}</h3>
                                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                                         <div className="space-y-2">
-                                                            <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Debt Type</label>
+                                                            <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">{t("debtType")}</label>
                                                             <select
                                                                 className="w-full bg-slate-950/50 border border-slate-700/50 rounded-lg px-4 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all"
                                                                 value={formData.debtType}
                                                                 onChange={(e) => setFormData({ ...formData, debtType: e.target.value })}
                                                             >
-                                                                <option value="Fixed">Fixed Rate</option>
-                                                                <option value="Variable">Variable / ARM</option>
-                                                                <option value="Interest Only">Interest Only</option>
-                                                                <option value="Balloon">Balloon</option>
-                                                                <option value="Seller Financing">Seller Financing</option>
+                                                                <option value="Fixed">{t("fixedRate")}</option>
+                                                                <option value="Variable">{t("variableArm")}</option>
+                                                                <option value="Interest Only">{t("interestOnly")}</option>
+                                                                <option value="Balloon">{t("balloon")}</option>
+                                                                <option value="Seller Financing">{t("sellerFinancing")}</option>
                                                             </select>
                                                         </div>
                                                         <div className="space-y-2">
-                                                            <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Interest Rate (%)</label>
+                                                            <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">{t("interestRate")}</label>
                                                             <div className="relative">
                                                                 <input
                                                                     type="number"
@@ -737,7 +737,7 @@ export function AddAssetModal({ isOpen, onClose, onAddAssets, initialStatus }: A
                                                             </div>
                                                         </div>
                                                         <div className="space-y-2">
-                                                            <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Loan Duration (Months)</label>
+                                                            <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">{t("loanDuration")}</label>
                                                             <input
                                                                 type="number"
                                                                 className="w-full bg-slate-950/50 border border-slate-700/50 rounded-lg px-4 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all placeholder:text-slate-600"
@@ -747,7 +747,7 @@ export function AddAssetModal({ isOpen, onClose, onAddAssets, initialStatus }: A
                                                             />
                                                         </div>
                                                         <div className="space-y-2">
-                                                            <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Fixed Term Remaining (Months)</label>
+                                                            <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">{t("fixedTermRemaining")}</label>
                                                             <input
                                                                 type="number"
                                                                 className="w-full bg-slate-950/50 border border-slate-700/50 rounded-lg px-4 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all placeholder:text-slate-600"
@@ -757,7 +757,7 @@ export function AddAssetModal({ isOpen, onClose, onAddAssets, initialStatus }: A
                                                             />
                                                         </div>
                                                         <div className="space-y-2">
-                                                            <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Monthly Debt Service (P+I)</label>
+                                                            <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">{t("monthlyDebtService")}</label>
                                                             <div className="relative">
                                                                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">$</span>
                                                                 <input
@@ -770,7 +770,7 @@ export function AddAssetModal({ isOpen, onClose, onAddAssets, initialStatus }: A
                                                             </div>
                                                         </div>
                                                         <div className="space-y-2">
-                                                            <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Monthly Principal Payment</label>
+                                                            <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">{t("monthlyPrincipalPayment")}</label>
                                                             <div className="relative">
                                                                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">$</span>
                                                                 <input
@@ -783,7 +783,7 @@ export function AddAssetModal({ isOpen, onClose, onAddAssets, initialStatus }: A
                                                             </div>
                                                         </div>
                                                         <div className="space-y-2 md:col-span-2">
-                                                            <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Reservice / Balloon Date</label>
+                                                            <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">{t("reserviceDate")}</label>
                                                             <input
                                                                 type="date"
                                                                 className="w-full bg-slate-950/50 border border-slate-700/50 rounded-lg px-4 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all placeholder:text-slate-600 [color-scheme:dark]"
@@ -886,28 +886,28 @@ export function AddAssetModal({ isOpen, onClose, onAddAssets, initialStatus }: A
                                                                 <p className="text-slate-300 text-xs">{aiResult.address}</p>
                                                             </div>
                                                             <div className="absolute top-4 right-4 bg-indigo-600/90 backdrop-blur-md text-white text-xs font-black px-3 py-1 rounded-full shadow-lg flex items-center gap-1.5">
-                                                                <Sparkles size={12} /> AI Verified
+                                                                <Sparkles size={12} /> {t("aiVerified")}
                                                             </div>
                                                         </div>
                                                         <div className="p-6 space-y-6">
                                                             <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
                                                                 <div className="space-y-1">
-                                                                    <p className="text-[10px] text-slate-500 uppercase font-black tracking-widest">Market Value</p>
+                                                                    <p className="text-[10px] text-slate-500 uppercase font-black tracking-widest">{t("marketValue")}</p>
                                                                     <p className="text-white font-bold text-lg">${Number(aiResult.currentValue || 0).toLocaleString()}</p>
                                                                 </div>
                                                                 <div className="space-y-1">
-                                                                    <p className="text-[10px] text-slate-500 uppercase font-black tracking-widest">Asset Type</p>
+                                                                    <p className="text-[10px] text-slate-500 uppercase font-black tracking-widest">{t("assetType")}</p>
                                                                     <p className="text-indigo-400 font-bold">{aiResult.type}</p>
                                                                 </div>
                                                                 {(aiResult.bedrooms || aiResult.bathrooms) && (
                                                                     <div className="space-y-1">
-                                                                        <p className="text-[10px] text-slate-500 uppercase font-black tracking-widest">Beds/Baths</p>
+                                                                        <p className="text-[10px] text-slate-500 uppercase font-black tracking-widest">{t("bedsBaths")}</p>
                                                                         <p className="text-slate-200 font-bold">{aiResult.bedrooms || "-"}/{aiResult.bathrooms || "-"}</p>
                                                                     </div>
                                                                 )}
                                                                 {aiResult.yearBuilt && (
                                                                     <div className="space-y-1">
-                                                                        <p className="text-[10px] text-slate-500 uppercase font-black tracking-widest">Year Built</p>
+                                                                        <p className="text-[10px] text-slate-500 uppercase font-black tracking-widest">{t("yearBuilt")}</p>
                                                                         <p className="text-slate-200 font-bold">{aiResult.yearBuilt}</p>
                                                                     </div>
                                                                 )}
