@@ -21,7 +21,7 @@ export async function POST(req: Request) {
         }
 
         const data = await resend.emails.send({
-            from: "Follio Alerts <onboarding@resend.dev>", // Replace with your domain when verified
+            from: "Follio <notifications@follio.app>",
             to: [to],
             subject: subject,
             react: NotificationEmail({
