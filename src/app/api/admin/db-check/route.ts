@@ -24,14 +24,16 @@ export async function GET(req: Request) {
     try {
         await client.connect();
         const tableCheck = await client.query(`
-            SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'properties')
+            SELECT table_name FROM information_schema.tables 
+            WHERE table_schema = 'public' 
+            AND table_name IN ('properties', 'notifications', 'notification_broadcasts')
         `);
-        const tableExists = tableCheck.rows?.[0]?.exists ?? false;
+        const existingTables = tableCheck.rows.map((r: any) => r.table_name);
 
-        let rowCount = 0;
-        if (tableExists) {
+        let propertyCount = 0;
+        if (existingTables.includes("properties")) {
             const countRes = await client.query(`SELECT COUNT(*) as c FROM public.properties`);
-            rowCount = parseInt(String(countRes.rows?.[0]?.c ?? 0), 10);
+            propertyCount = parseInt(String(countRes.rows?.[0]?.c ?? 0), 10);
         }
 
         return NextResponse.json({
@@ -39,8 +41,8 @@ export async function GET(req: Request) {
             dbProjectRef: projectRef,
             appProjectRef: appRef,
             match: projectRef === appRef,
-            tableExists,
-            totalProperties: rowCount,
+            tables: existingTables,
+            totalProperties: propertyCount,
         });
     } catch (err: any) {
         return NextResponse.json({
