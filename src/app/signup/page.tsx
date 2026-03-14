@@ -27,7 +27,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 export default function SignupPage() {
-    const { t, setPortfolioType } = useSettings();
+    const { t, setPortfolioType, setOnboardingCompleted } = useSettings();
     const router = useRouter();
     const [step, setStep] = useState(1);
     const [formData, setFormData] = useState({
@@ -46,10 +46,12 @@ export default function SignupPage() {
     };
 
     const startTutorial = () => {
+        setOnboardingCompleted(true);
         router.push("/dashboard?tutorial=true");
     };
 
     const skipTutorial = () => {
+        setOnboardingCompleted(true);
         router.push("/dashboard");
     };
 

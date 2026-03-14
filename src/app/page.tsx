@@ -19,11 +19,9 @@ export default function LandingPage() {
 
   useEffect(() => {
     if (isLoaded && isSignedIn) {
-      // If we see the dashboard button is current state, maybe check if we should redirect
-      // For now, let's not force it on every load to allow browsing landing page
-      // but the user wants to be taken to the flow.
+      router.push("/dashboard");
     }
-  }, [isLoaded, isSignedIn]);
+  }, [isLoaded, isSignedIn, router]);
 
   return (
     <div className="min-h-screen w-full relative overflow-hidden flex flex-col text-slate-200">
