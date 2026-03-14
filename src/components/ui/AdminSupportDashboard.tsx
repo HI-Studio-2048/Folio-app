@@ -123,8 +123,8 @@ export function AdminSupportDashboard({ activeTab = "Overview" }: { activeTab?: 
     const totalUsers = usersData.length;
     const payingUsersCount = usersData.filter(u => u.plan === "Pro" || u.plan === "Enterprise").length;
     const mrrValue = usersData.reduce((acc, u) => {
-        if (u.plan === "Pro") return acc + 29;
-        if (u.plan === "Enterprise") return acc + 99;
+        if (u.plan === "Pro") return acc + 90;
+        if (u.plan === "Enterprise") return acc + 490;
         return acc;
     }, 0);
 
@@ -577,7 +577,7 @@ function AdminInfrastructureView() {
                 {/* DB Status Card */}
                 <div className="lg:col-span-2 glass-card rounded-3xl border border-slate-700/40 p-6 relative overflow-hidden">
                     <div className="absolute top-0 right-0 p-4">
-                        <Database className="text-slate-800" size={60} />
+                        <Server className="text-slate-800" size={60} />
                     </div>
                     <h3 className="text-sm font-black text-slate-500 uppercase tracking-widest mb-6">Primary Database Hub</h3>
 

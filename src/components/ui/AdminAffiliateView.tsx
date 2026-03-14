@@ -22,9 +22,9 @@ const MOCK_AFFILIATES = [
         payout_email: "david@paypal.me", total_clicks: 1842, total_conversions: 48,
         total_earned: 5614.80, pending_payout: 980.00, created_at: "2026-01-15T00:00:00Z",
         conversions: [
-            { id: "c1", amount_usd: 29, commission_earned: 11.60, status: "confirmed", created_at: "2026-03-10T10:00:00Z" },
-            { id: "c2", amount_usd: 99, commission_earned: 39.60, status: "confirmed", created_at: "2026-03-08T10:00:00Z" },
-            { id: "c3", amount_usd: 29, commission_earned: 11.60, status: "pending", created_at: "2026-03-14T10:00:00Z" },
+            { id: "c1", amount_usd: 90, commission_earned: 36.00, status: "confirmed", created_at: "2026-03-10T10:00:00Z" },
+            { id: "c2", amount_usd: 490, commission_earned: 196.00, status: "confirmed", created_at: "2026-03-08T10:00:00Z" },
+            { id: "c3", amount_usd: 90, commission_earned: 36.00, status: "pending", created_at: "2026-03-14T10:00:00Z" },
         ],
         payouts: [
             { id: "p1", amount: 1200, status: "paid", paid_at: "2026-02-01T00:00:00Z" },
@@ -37,8 +37,8 @@ const MOCK_AFFILIATES = [
         payout_email: "emma@paypal.me", total_clicks: 612, total_conversions: 14,
         total_earned: 1215.60, pending_payout: 290.00, created_at: "2026-02-01T00:00:00Z",
         conversions: [
-            { id: "c4", amount_usd: 29, commission_earned: 8.70, status: "confirmed", created_at: "2026-03-12T10:00:00Z" },
-            { id: "c5", amount_usd: 29, commission_earned: 8.70, status: "pending", created_at: "2026-03-14T10:00:00Z" },
+            { id: "c4", amount_usd: 90, commission_earned: 27.00, status: "confirmed", created_at: "2026-03-12T10:00:00Z" },
+            { id: "c5", amount_usd: 90, commission_earned: 27.00, status: "pending", created_at: "2026-03-14T10:00:00Z" },
         ],
         payouts: [
             { id: "p3", amount: 290, status: "paid", paid_at: "2026-03-01T00:00:00Z" },
@@ -50,7 +50,7 @@ const MOCK_AFFILIATES = [
         payout_email: null, total_clicks: 274, total_conversions: 5,
         total_earned: 435.00, pending_payout: 435.00, created_at: "2026-02-20T00:00:00Z",
         conversions: [
-            { id: "c6", amount_usd: 99, commission_earned: 29.70, status: "confirmed", created_at: "2026-03-05T10:00:00Z" },
+            { id: "c6", amount_usd: 490, commission_earned: 147.00, status: "confirmed", created_at: "2026-03-05T10:00:00Z" },
         ],
         payouts: [],
     },
