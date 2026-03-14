@@ -40,6 +40,7 @@ import {
     Plus,
     Layers
 } from "lucide-react";
+import { AdminAffiliateView } from "@/components/ui/AdminAffiliateView";
 import {
     Area,
     AreaChart,
@@ -132,6 +133,7 @@ export function AdminSupportDashboard({ activeTab = "Overview" }: { activeTab?: 
     if (activeTab === "Mass Notification") return <AdminNotificationsView />;
     if (activeTab === "Global Config") return <AdminConfigView />;
     if (activeTab === "Support Tickets") return <AdminSupportTicketsView />;
+    if (activeTab === "Affiliate Program") return <AdminAffiliateView />;
 
     return (
         <div className="space-y-8 pb-12">

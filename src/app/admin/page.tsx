@@ -16,7 +16,8 @@ import {
     Network,
     Zap,
     Mail,
-    Layers
+    Layers,
+    Gift
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
@@ -162,6 +163,7 @@ export default function AdminPage() {
                         <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Internal Tools</span>
                     </div>
                     <AdminSidebarItem icon={Zap} label="Marketing Flows" active={activeTab === "Marketing Flows"} onClick={() => setActiveTab("Marketing Flows")} />
+                    <AdminSidebarItem icon={Gift} label="Affiliate Program" active={activeTab === "Affiliate Program"} onClick={() => setActiveTab("Affiliate Program")} />
                     <AdminSidebarItem icon={Bell} label="Mass Notification" active={activeTab === "Mass Notification"} onClick={() => setActiveTab("Mass Notification")} />
                     <AdminSidebarItem icon={Settings} label="Global Config" active={activeTab === "Global Config"} onClick={() => setActiveTab("Global Config")} />
                     <AdminSidebarItem icon={HelpCircle} label="Support Tickets" active={activeTab === "Support Tickets"} onClick={() => setActiveTab("Support Tickets")} />
