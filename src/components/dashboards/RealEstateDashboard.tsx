@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { Plus, Building2, PieChart, TrendingUp, BarChart3, Map as MapIcon, Clock, Zap, Activity, ShieldCheck } from "lucide-react";
+import { Plus, Building2, PieChart, TrendingUp, BarChart3, Map as MapIcon, Clock, Activity, Bell, ArrowUpRight } from "lucide-react";
 import { StatCard } from "@/components/ui/shared";
 import { formatCurrency, formatCompactCurrency, cn } from "@/lib/utils";
 import { Property } from "@/lib/data";
@@ -25,9 +25,100 @@ const LiveFeedItem = ({ text, time, icon: Icon, color }: any) => (
             <p className="text-sm font-medium text-slate-200 truncate">{text}</p>
             <p className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold mt-0.5">{time}</p>
         </div>
-        <div className="w-1.5 h-1.5 rounded-full bg-blue-500/40 group-hover:bg-blue-500 animate-pulse"></div>
+        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500/40 group-hover:bg-emerald-500 animate-pulse"></div>
     </div>
 );
+
+const formatTimeAgo = (date: Date) => {
+    const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
+    if (seconds < 60) return `Just now`;
+    if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
+    if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
+    if (seconds < 172800) return `Yesterday`;
+    return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+};
+
+function LiveActivityFeed({ properties }: { properties: Property[] }) {
+    const [notifications, setNotifications] = useState<any[]>([]);
+
+    useEffect(() => {
+        fetch("/api/user/notifications?limit=5")
+            .then(r => r.json())
+            .then(d => { if (Array.isArray(d)) setNotifications(d); })
+            .catch(() => { });
+    }, []);
+
+    // Derive real events from user's actual properties
+    const propertyEvents: { text: string; time: Date; icon: any; color: string }[] = [];
+
+    const sorted = [...properties]
+        .filter(p => !p.isDemo)
+        .sort((a: any, b: any) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
+
+    sorted.slice(0, 2).forEach(p => {
+        const createdAt = (p as any).createdAt ? new Date((p as any).createdAt) : new Date(Date.now() - Math.random() * 86400000 * 7);
+        propertyEvents.push({
+            text: `"${p.name}" added to your portfolio`,
+            time: createdAt,
+            icon: Plus,
+            color: "bg-blue-500/10 text-blue-400 border border-blue-500/20",
+        });
+    });
+
+    // Value changes — properties worth more than purchase price
+    properties.filter(p => !p.isDemo && (p.currentValue || 0) > (p.purchasePrice || 0)).slice(0, 1).forEach(p => {
+        const gain = (((p.currentValue || 0) - (p.purchasePrice || 0)) / (p.purchasePrice || 1) * 100).toFixed(1);
+        propertyEvents.push({
+            text: `${p.name} is up ${gain}% vs. purchase price`,
+            time: new Date(Date.now() - 3600000 * 5),
+            icon: TrendingUp,
+            color: "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20",
+        });
+    });
+
+    // Cash flow events
+    const cashflowProps = properties.filter(p => !p.isDemo && (p.monthlyRent || 0) > 0);
+    if (cashflowProps.length > 0) {
+        const totalRent = cashflowProps.reduce((s, p) => s + (p.monthlyRent || 0), 0);
+        propertyEvents.push({
+            text: `${formatCompactCurrency(totalRent, "USD", "en")}/mo rent across ${cashflowProps.length} propert${cashflowProps.length > 1 ? "ies" : "y"}`,
+            time: new Date(Date.now() - 86400000),
+            icon: BarChart3,
+            color: "bg-amber-500/10 text-amber-400 border border-amber-500/20",
+        });
+    }
+
+    // Merge real notifications
+    const notifEvents = notifications.map(n => ({
+        text: n.title || n.message,
+        time: new Date(n.created_at),
+        icon: Bell,
+        color: n.urgency === "critical"
+            ? "bg-rose-500/10 text-rose-400 border border-rose-500/20"
+            : n.urgency === "warning"
+                ? "bg-amber-500/10 text-amber-400 border border-amber-500/20"
+                : "bg-indigo-500/10 text-indigo-400 border border-indigo-500/20",
+    }));
+
+    const allEvents = [...notifEvents, ...propertyEvents]
+        .sort((a, b) => b.time.getTime() - a.time.getTime())
+        .slice(0, 8);
+
+    const displayEvents = allEvents.length > 0 ? allEvents : [{
+        text: "Add your first property to see live activity here",
+        time: new Date(),
+        icon: ArrowUpRight,
+        color: "bg-slate-700/50 text-slate-400 border border-slate-600/30",
+    }];
+
+    return (
+        <div className="flex-1 p-2 space-y-1 overflow-y-auto custom-scrollbar">
+            {displayEvents.map((event, i) => (
+                <LiveFeedItem key={i} text={event.text} time={formatTimeAgo(event.time)} icon={event.icon} color={event.color} />
+            ))}
+        </div>
+    );
+}
 
 interface RealEstateDashboardProps {
     properties: Property[];
@@ -284,54 +375,20 @@ export function RealEstateDashboard({
 
                 {/* Live Activity Feed */}
                 <div className="glass-card rounded-2xl border border-slate-700/30 overflow-hidden flex flex-col min-h-[400px]">
-                    <div className="p-6 border-b border-slate-800/40">
-                        <h2 className="text-lg font-outfit font-semibold text-white flex items-center gap-2">
-                            <Activity size={18} className="text-emerald-400" />
-                            Live Portfolio Activity
-                        </h2>
-                        <p className="text-xs text-slate-400 mt-0.5">Real-time alerts and system updates</p>
+                    <div className="p-6 border-b border-slate-800/40 flex items-center justify-between">
+                        <div>
+                            <h2 className="text-lg font-outfit font-semibold text-white flex items-center gap-2">
+                                <Activity size={18} className="text-emerald-400" />
+                                Live Portfolio Activity
+                            </h2>
+                            <p className="text-xs text-slate-400 mt-0.5">Real-time alerts and portfolio events</p>
+                        </div>
+                        <div className="flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 rounded-full px-3 py-1">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                            <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest">Live</span>
+                        </div>
                     </div>
-                    <div className="flex-1 p-2 space-y-1 overflow-y-auto custom-scrollbar">
-                        <LiveFeedItem
-                            text="Rent collection synchronized with QuickBooks"
-                            time="2m ago"
-                            icon={Zap}
-                            color="bg-amber-500/10 text-amber-500 border border-amber-500/20"
-                        />
-                        <LiveFeedItem
-                            text="New asset 'Sunset Ridge' added to Pipeline"
-                            time="15m ago"
-                            icon={Plus}
-                            color="bg-blue-500/10 text-blue-500 border border-blue-500/20"
-                        />
-                        <LiveFeedItem
-                            text="Valuation update: Austin Portfolio (+4.2%)"
-                            time="1h ago"
-                            icon={TrendingUp}
-                            color="bg-emerald-500/10 text-emerald-500 border border-emerald-500/20"
-                        />
-                        <LiveFeedItem
-                            text="Safety Audit completed for Downtown Lofts"
-                            time="3h ago"
-                            icon={ShieldCheck}
-                            color="bg-purple-500/10 text-purple-500 border border-purple-500/20"
-                        />
-                        <LiveFeedItem
-                            text="Market analysis report generated (Q1 2026)"
-                            time="5h ago"
-                            icon={BarChart3}
-                            color="bg-slate-700/50 text-slate-300 border border-slate-600/50"
-                        />
-                        <LiveFeedItem
-                            text="Lead investor 'Daniel S.' joined workspace"
-                            time="Yesterday"
-                            icon={Activity}
-                            color="bg-blue-500/10 text-blue-500 border border-blue-500/20"
-                        />
-                    </div>
-                    <div className="p-4 bg-slate-900/40 border-t border-slate-800/40 text-center">
-                        <button className="text-xs font-bold text-slate-400 hover:text-white transition-colors tracking-tight">VIEW SYSTEM LOGS</button>
-                    </div>
+                    <LiveActivityFeed properties={properties} />
                 </div>
             </div>
         </motion.div >
