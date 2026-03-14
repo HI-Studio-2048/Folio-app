@@ -29,7 +29,7 @@ export default function RootLayout({
     <ClerkProvider publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY || "pk_test_Y2xlYXItcXVhaWwtNDEuY2xlcmsuYWNjb3VudHMuZGV2JA"}>
       <html lang="en" className="dark">
         <body
-          className={`${inter.variable} ${outfit.variable} font-sans antialiased min-h-screen bg-[#06080F] text-slate-100 flex`}
+          className={`${inter.variable} ${outfit.variable} font-sans antialiased min-h-screen bg-[#06080F] text-slate-100 flex flex-col items-center`}
         >
           <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 pointer-events-none z-0"></div>
           <div className="absolute inset-0 bg-gradient-to-tr from-[#06080F] via-slate-900/80 to-[#1e1b4b]/20 z-0 pointer-events-none"></div>
