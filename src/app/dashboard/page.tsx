@@ -53,6 +53,7 @@ import { FeatureRequestPopup } from "@/components/ui/FeatureRequestPopup";
 import { SharePortfolioModal } from "@/components/ui/SharePortfolioModal";
 import { PortfolioHealthModal } from "@/components/ui/PortfolioHealthModal";
 import { TutorialOverlay } from "@/components/ui/TutorialOverlay";
+import { StarterFlow } from "@/components/ui/StarterFlow";
 import { NotesSection } from "@/components/dashboards/NotesSection";
 import { supabaseService, mapPropertyToDb } from "@/lib/supabase-service";
 import { supabase } from "@/lib/supabase";
@@ -254,7 +255,16 @@ function DashboardContent() {
     };
 
     const stats = getPortfolioStats(properties);
-    const { t, currency, locale, portfolioType, portfolioName, setPortfolioName } = useSettings();
+    const { t, currency, locale, portfolioType, portfolioName, setPortfolioName, onboardingCompleted } = useSettings();
+    const router = useRouter();
+
+    useEffect(() => {
+        if (isLoaded && user && !onboardingCompleted && !viewUserId) {
+            router.push("/signup");
+        }
+    }, [isLoaded, user, onboardingCompleted, viewUserId, router]);
+
+    const isNewUser = !isLoading && properties.length > 0 && properties.every(p => p.isDemo);
 
     // Dynamic Portfolio Health Calculation
     const ltv = stats.totalValue > 0 ? (stats.totalDebt / stats.totalValue) * 100 : 0;
@@ -727,6 +737,15 @@ function DashboardContent() {
                         </AnimatePresence>
                     )}
                 </div>
+
+                <AnimatePresence>
+                    {isNewUser && !isLoading && !isAddModalOpen && (
+                        <StarterFlow
+                            onOpenAddModal={() => openAddModal()}
+                            onStartTutorial={() => router.push("/dashboard?tutorial=true")}
+                        />
+                    )}
+                </AnimatePresence>
             </main>
 
             <AddAssetModal

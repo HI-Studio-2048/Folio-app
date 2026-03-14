@@ -1599,186 +1599,374 @@ function AdminSupportTicketsView() {
     );
 }
 function AdminMarketingFlowsView() {
-    const [flows, setFlows] = useState<any[]>([]);
+    const [flows, setFlows] = useState<any[] | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [selectedFlow, setSelectedFlow] = useState<any>(null);
+    const [showCreateModal, setShowCreateModal] = useState(false);
+    const [newFlowName, setNewFlowName] = useState("");
+    const [newFlowDesc, setNewFlowDesc] = useState("");
+    const [creating, setCreating] = useState(false);
+    const [toggling, setToggling] = useState<string | null>(null);
+    const [dbMissing, setDbMissing] = useState(false);
 
     const fetchFlows = async () => {
         setIsLoading(true);
         try {
             const res = await fetch("/api/admin/marketing/flows");
             const data = await res.json();
-            setFlows(data);
+            if (Array.isArray(data)) {
+                setFlows(data);
+                if (data.length > 0 && !selectedFlow) setSelectedFlow(data[0]);
+            } else {
+                setFlows([]);
+                if (data?.error?.includes("does not exist") || data?.error?.includes("schema cache")) {
+                    setDbMissing(true);
+                }
+            }
         } catch (e) {
             console.error("Failed to fetch flows:", e);
+            setFlows([]);
         } finally {
             setIsLoading(false);
         }
     };
 
-    useEffect(() => {
-        fetchFlows();
-    }, []);
+    useEffect(() => { fetchFlows(); }, []);
+
+    const handleCreate = async () => {
+        if (!newFlowName.trim()) return;
+        setCreating(true);
+        try {
+            const res = await fetch("/api/admin/marketing/flows", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ name: newFlowName, description: newFlowDesc, is_active: true }),
+            });
+            if (res.ok) {
+                setNewFlowName("");
+                setNewFlowDesc("");
+                setShowCreateModal(false);
+                await fetchFlows();
+            }
+        } finally {
+            setCreating(false);
+        }
+    };
+
+    const handleToggle = async (flow: any) => {
+        setToggling(flow.id);
+        try {
+            await fetch(`/api/admin/marketing/flows/${flow.id}`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ is_active: !flow.is_active }),
+            });
+            await fetchFlows();
+        } finally {
+            setToggling(null);
+        }
+    };
+
+    const sortedSteps = (steps: any[]) =>
+        Array.isArray(steps) ? [...steps].sort((a, b) => a.day_offset - b.day_offset) : [];
 
     return (
-        <motion.div
-            initial={{ opacity: 0, scale: 0.98 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="space-y-8"
-        >
+        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-8">
+            {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                     <h1 className="text-3xl font-outfit font-bold text-white mb-2 flex items-center gap-3">
-                        <Zap className="text-amber-400" />
-                        Email Marketing Flows
+                        <Zap className="text-amber-400" /> Email Marketing Flows
                     </h1>
-                    <p className="text-slate-400 text-sm">Automate user engagement with multi-step email sequences.</p>
+                    <p className="text-slate-400 text-sm">Automate user engagement with scheduled email sequences.</p>
                 </div>
-                <button className="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-3 rounded-2xl text-xs font-bold uppercase tracking-widest shadow-lg shadow-indigo-600/20 flex items-center gap-2 transition-all">
-                    <Plus size={16} /> Create New Flow
-                </button>
+                <div className="flex items-center gap-3">
+                    <button
+                        onClick={() => fetchFlows()}
+                        className="p-3 rounded-2xl bg-slate-800 border border-slate-700 text-slate-400 hover:text-white transition-all"
+                        title="Refresh"
+                    >
+                        <History size={16} />
+                    </button>
+                    <button
+                        onClick={() => setShowCreateModal(true)}
+                        className="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-3 rounded-2xl text-xs font-bold uppercase tracking-widest shadow-lg shadow-indigo-600/20 flex items-center gap-2 transition-all"
+                    >
+                        <Plus size={16} /> Create New Flow
+                    </button>
+                </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 text-slate-200">
-                {/* Flow List */}
-                <div className="lg:col-span-1 space-y-4">
-                    <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] px-2">Active Sequences</h3>
+            {/* DB Missing Banner */}
+            {dbMissing && (
+                <div className="p-5 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-bold flex items-start gap-4">
+                    <AlertCircle size={20} className="shrink-0 mt-0.5" />
+                    <div>
+                        <p className="uppercase tracking-widest mb-1">Database tables not found</p>
+                        <p className="font-normal text-amber-300/70 leading-relaxed">
+                            Run the migration in your Supabase SQL Editor: <code className="font-mono bg-amber-500/10 px-1 rounded">supabase/migrations/20260314_marketing_flows.sql</code>, then reload.
+                        </p>
+                    </div>
+                </div>
+            )}
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                {/* LEFT: Flow List */}
+                <div className="lg:col-span-1 space-y-3">
+                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] px-1">Sequences ({flows?.length ?? 0})</p>
                     {isLoading ? (
-                        <div className="flex flex-col gap-4">
-                            {[1, 2].map((i) => (
-                                <div key={i} className="h-24 bg-slate-900/40 animate-pulse rounded-3xl border border-slate-800/60" />
-                            ))}
-                        </div>
-                    ) : Array.isArray(flows) ? (
+                        [1, 2, 3].map(i => (
+                            <div key={i} className="h-28 bg-slate-900/40 animate-pulse rounded-3xl border border-slate-800/60" />
+                        ))
+                    ) : flows && flows.length > 0 ? (
                         flows.map((flow) => (
                             <button
                                 key={flow.id}
                                 onClick={() => setSelectedFlow(flow)}
                                 className={cn(
-                                    "w-full text-left p-6 rounded-3xl border transition-all relative group overflow-hidden",
+                                    "w-full text-left p-5 rounded-3xl border transition-all group relative overflow-hidden",
                                     selectedFlow?.id === flow.id
-                                        ? "bg-indigo-600/10 border-indigo-500/50 shadow-lg shadow-indigo-500/10"
+                                        ? "bg-indigo-600/10 border-indigo-500/50 shadow-lg shadow-indigo-500/5"
                                         : "bg-slate-900/40 border-slate-800 hover:border-slate-700"
                                 )}
                             >
-                                <div className="flex items-center justify-between mb-2">
-                                    <h4 className="font-bold text-sm text-white">{flow.name}</h4>
-                                    <div className={cn(
-                                        "w-2 h-2 rounded-full",
-                                        flow.is_active ? "bg-emerald-500 animate-pulse" : "bg-slate-600"
-                                    )} />
+                                <div className="flex items-start justify-between gap-2 mb-2">
+                                    <h4 className="font-bold text-sm text-white line-clamp-1">{flow.name}</h4>
+                                    <button
+                                        onClick={(e) => { e.stopPropagation(); handleToggle(flow); }}
+                                        className={cn(
+                                            "shrink-0 w-8 h-4 rounded-full transition-all relative flex items-center",
+                                            flow.is_active ? "bg-emerald-500" : "bg-slate-700"
+                                        )}
+                                        title={flow.is_active ? "Deactivate" : "Activate"}
+                                    >
+                                        <span className={cn(
+                                            "w-3 h-3 rounded-full bg-white absolute transition-all",
+                                            flow.is_active ? "left-4" : "left-0.5"
+                                        )} />
+                                    </button>
                                 </div>
-                                <p className="text-[10px] text-slate-500 line-clamp-2 mb-4 leading-relaxed">{flow.description}</p>
+                                <p className="text-[10px] text-slate-500 line-clamp-2 mb-3 leading-relaxed">{flow.description || "No description."}</p>
                                 <div className="flex items-center gap-4">
-                                    <div className="flex items-center gap-1.5">
-                                        <Layers size={12} className="text-slate-600" />
-                                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">{flow.steps?.length || 0} Steps</span>
-                                    </div>
-                                    <div className="flex items-center gap-1.5">
-                                        <Users size={12} className="text-slate-600" />
-                                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">1.2K Enrolled</span>
-                                    </div>
+                                    <span className="flex items-center gap-1.5 text-[10px] font-bold text-slate-400">
+                                        <Layers size={10} className="text-slate-600" />
+                                        {flow.steps?.length || 0} Steps
+                                    </span>
+                                    <span className={cn(
+                                        "text-[9px] px-2 py-0.5 rounded-full font-black uppercase tracking-widest border",
+                                        flow.is_active
+                                            ? "text-emerald-400 bg-emerald-500/10 border-emerald-500/20"
+                                            : "text-slate-500 bg-slate-800 border-slate-700"
+                                    )}>
+                                        {flow.is_active ? "Live" : "Paused"}
+                                    </span>
                                 </div>
                             </button>
                         ))
-                    ) : (
-                        <div className="p-6 rounded-3xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-[10px] font-bold uppercase tracking-widest text-center">
-                            Failed to load sequences. Ensure database migrations are applied.
+                    ) : !dbMissing ? (
+                        <div className="p-8 rounded-3xl bg-slate-900/20 border border-slate-800/40 text-center space-y-3">
+                            <ZapOff size={28} className="text-slate-700 mx-auto" />
+                            <p className="text-[10px] font-black text-slate-600 uppercase tracking-widest">No sequences yet</p>
+                            <button
+                                onClick={() => setShowCreateModal(true)}
+                                className="text-indigo-400 text-[10px] font-black uppercase tracking-widest hover:text-indigo-300"
+                            >
+                                + Create your first flow
+                            </button>
                         </div>
-                    )}
+                    ) : null}
                 </div>
 
-                {/* Flow Editor / Details */}
-                <div className="lg:col-span-2 space-y-6">
+                {/* RIGHT: Step Timeline / Detail */}
+                <div className="lg:col-span-2">
                     {selectedFlow ? (
-                        <div className="glass-card p-8 rounded-3xl border border-slate-700/40 shadow-2xl space-y-8 animate-in slide-in-from-right-4 duration-500">
-                            <div className="flex items-start justify-between">
-                                <div className="space-y-1">
-                                    <div className="flex items-center gap-3">
+                        <motion.div
+                            key={selectedFlow.id}
+                            initial={{ opacity: 0, x: 12 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ duration: 0.3 }}
+                            className="glass-card rounded-3xl border border-slate-700/40 shadow-2xl overflow-hidden"
+                        >
+                            {/* Flow Header */}
+                            <div className="p-8 border-b border-slate-800/60 flex items-start justify-between gap-4">
+                                <div className="space-y-1.5">
+                                    <div className="flex items-center gap-3 flex-wrap">
                                         <h2 className="text-xl font-bold text-white">{selectedFlow.name}</h2>
-                                        <span className="px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-400 text-[10px] font-black uppercase tracking-widest border border-indigo-500/20">System Critical</span>
+                                        <span className={cn(
+                                            "px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-widest border",
+                                            selectedFlow.is_active
+                                                ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                                                : "bg-slate-800 text-slate-500 border-slate-700"
+                                        )}>
+                                            {selectedFlow.is_active ? "● Active" : "○ Paused"}
+                                        </span>
                                     </div>
-                                    <p className="text-xs text-slate-500">{selectedFlow.description}</p>
+                                    <p className="text-xs text-slate-500 max-w-lg">{selectedFlow.description}</p>
                                 </div>
-                                <div className="flex items-center gap-3">
-                                    <button className="p-3 rounded-2xl bg-slate-800 text-slate-400 hover:text-rose-400 transition-colors">
-                                        <Trash2 size={18} />
-                                    </button>
-                                    <button className="bg-emerald-600 hover:bg-emerald-500 text-white px-5 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-widest flex items-center gap-2 transition-all">
-                                        <Save size={14} /> Update Flow
+                                <div className="flex items-center gap-2 shrink-0">
+                                    <button
+                                        onClick={() => handleToggle(selectedFlow)}
+                                        className={cn(
+                                            "px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all",
+                                            selectedFlow.is_active
+                                                ? "bg-rose-500/10 border-rose-500/20 text-rose-400 hover:bg-rose-500/20"
+                                                : "bg-emerald-500/10 border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/20"
+                                        )}
+                                    >
+                                        {toggling === selectedFlow.id ? "..." : selectedFlow.is_active ? "Pause" : "Activate"}
                                     </button>
                                 </div>
                             </div>
 
-                            <div className="space-y-4">
-                                <div className="flex items-center justify-between px-2">
-                                    <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Sequence Steps</h3>
-                                    <button className="text-[10px] font-black text-indigo-400 hover:text-indigo-300 uppercase tracking-widest flex items-center gap-1.5 transition-colors">
+                            {/* Stats Row */}
+                            <div className="grid grid-cols-4 divide-x divide-slate-800/60 border-b border-slate-800/60">
+                                {[
+                                    { label: "Steps", value: selectedFlow.steps?.length || 0, color: "text-white" },
+                                    { label: "Duration", value: `${selectedFlow.steps?.length > 0 ? Math.max(...(selectedFlow.steps || []).map((s: any) => s.day_offset)) : 0}d`, color: "text-blue-400" },
+                                    { label: "Status", value: selectedFlow.is_active ? "Live" : "Paused", color: selectedFlow.is_active ? "text-emerald-400" : "text-slate-500" },
+                                    { label: "Created", value: new Date(selectedFlow.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric" }), color: "text-slate-400" },
+                                ].map((stat, i) => (
+                                    <div key={i} className="p-5 text-center">
+                                        <p className={cn("text-xl font-bold font-mono mb-1", stat.color)}>{stat.value}</p>
+                                        <p className="text-[9px] font-black uppercase text-slate-600 tracking-widest">{stat.label}</p>
+                                    </div>
+                                ))}
+                            </div>
+
+                            {/* Sequence Steps */}
+                            <div className="p-8 space-y-6">
+                                <div className="flex items-center justify-between">
+                                    <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Sequence Timeline</h3>
+                                    <button className="flex items-center gap-1.5 text-[10px] font-black text-indigo-400 hover:text-indigo-300 uppercase tracking-widest transition-colors">
                                         <Plus size={12} /> Add Step
                                     </button>
                                 </div>
 
-                                <div className="space-y-4">
-                                    {Array.isArray(selectedFlow.steps) && [...selectedFlow.steps].sort((a: any, b: any) => a.day_offset - b.day_offset).map((step: any, idx: number) => (
-                                        <div key={step.id} className="group relative flex gap-6">
-                                            {/* Timeline Visual */}
-                                            <div className="flex flex-col items-center">
-                                                <div className="w-8 h-8 rounded-xl bg-slate-900 border border-slate-700 flex items-center justify-center text-[10px] font-black text-indigo-400 z-10">
-                                                    D{step.day_offset}
-                                                </div>
-                                                {idx !== selectedFlow.steps.length - 1 && (
-                                                    <div className="flex-1 w-px bg-gradient-to-b from-slate-700 to-transparent my-2" />
-                                                )}
-                                            </div>
-
-                                            {/* Step Card */}
-                                            <div className="flex-1 p-5 rounded-2xl bg-white/[0.03] border border-white/5 group-hover:bg-white/[0.05] group-hover:border-white/10 transition-all flex flex-col md:flex-row md:items-center justify-between gap-4">
-                                                <div className="space-y-1">
-                                                    <p className="text-xs font-bold text-white uppercase tracking-tight">{step.subject}</p>
-                                                    <p className="text-[10px] text-slate-500 line-clamp-1 italic">"{step.body}"</p>
-                                                </div>
-                                                <div className="flex items-center gap-3 shrink-0">
-                                                    <div className="p-2 rounded-lg bg-slate-800 text-slate-400 hover:text-white transition-colors cursor-pointer">
-                                                        <Mail size={14} />
+                                {sortedSteps(selectedFlow.steps).length === 0 ? (
+                                    <div className="text-center py-12 text-slate-600">
+                                        <Mail size={28} className="mx-auto mb-3 opacity-30" />
+                                        <p className="text-[10px] font-black uppercase tracking-widest">No steps in this flow yet</p>
+                                    </div>
+                                ) : (
+                                    <div className="space-y-3">
+                                        {sortedSteps(selectedFlow.steps).map((step: any, idx: number) => (
+                                            <div key={step.id} className="flex gap-5 group">
+                                                {/* Timeline Node */}
+                                                <div className="flex flex-col items-center">
+                                                    <div className={cn(
+                                                        "w-10 h-10 rounded-xl flex flex-col items-center justify-center border shrink-0 transition-all",
+                                                        "bg-indigo-600/10 border-indigo-500/30 group-hover:border-indigo-400/60"
+                                                    )}>
+                                                        <span className="text-[8px] font-black text-indigo-500 uppercase tracking-wider leading-none">DAY</span>
+                                                        <span className="text-sm font-black text-indigo-400 leading-tight">{step.day_offset}</span>
                                                     </div>
-                                                    <div className="p-2 rounded-lg bg-slate-800 text-slate-400 hover:text-white transition-colors cursor-pointer">
-                                                        <Settings size={14} />
+                                                    {idx !== selectedFlow.steps.length - 1 && (
+                                                        <div className="flex-1 w-px bg-gradient-to-b from-indigo-500/20 to-transparent min-h-4 mt-2" />
+                                                    )}
+                                                </div>
+
+                                                {/* Step Card */}
+                                                <div className="flex-1 pb-3">
+                                                    <div className="p-5 rounded-2xl bg-white/[0.025] border border-white/5 group-hover:bg-white/[0.04] group-hover:border-white/[0.08] transition-all">
+                                                        <div className="flex items-start justify-between gap-4">
+                                                            <div className="space-y-1.5 min-w-0">
+                                                                <div className="flex items-center gap-2">
+                                                                    <Mail size={12} className="text-slate-500 shrink-0" />
+                                                                    <p className="text-sm font-bold text-white truncate">{step.subject}</p>
+                                                                </div>
+                                                                <p className="text-[11px] text-slate-500 leading-relaxed line-clamp-2 italic pl-5">
+                                                                    "{step.body}"
+                                                                </p>
+                                                            </div>
+                                                            <div className="flex items-center gap-2 shrink-0">
+                                                                <button className="p-2 rounded-lg bg-slate-800/80 text-slate-500 hover:text-white transition-colors" title="Edit step">
+                                                                    <Settings size={13} />
+                                                                </button>
+                                                                <button className="p-2 rounded-lg bg-slate-800/80 text-slate-500 hover:text-rose-400 transition-colors" title="Delete step">
+                                                                    <Trash2 size={13} />
+                                                                </button>
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    ))}
-                                </div>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
-
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t border-slate-800/60">
-                                <div>
-                                    <p className="text-[9px] font-black text-slate-600 uppercase mb-1">Total Sent</p>
-                                    <p className="text-lg font-bold text-white font-mono">14,284</p>
-                                </div>
-                                <div>
-                                    <p className="text-[9px] font-black text-slate-600 uppercase mb-1">Open Rate</p>
-                                    <p className="text-lg font-bold text-emerald-400 font-mono">68.4%</p>
-                                </div>
-                                <div>
-                                    <p className="text-[9px] font-black text-slate-600 uppercase mb-1">CTR</p>
-                                    <p className="text-lg font-bold text-blue-400 font-mono">12.1%</p>
-                                </div>
-                                <div>
-                                    <p className="text-[9px] font-black text-slate-600 uppercase mb-1">Conversion</p>
-                                    <p className="text-lg font-bold text-indigo-400 font-mono">4.2%</p>
-                                </div>
-                            </div>
-                        </div>
+                        </motion.div>
                     ) : (
-                        <div className="h-[50vh] flex flex-col items-center justify-center bg-slate-900/20 border border-slate-800/40 rounded-3xl opacity-40">
+                        <div className="h-[60vh] flex flex-col items-center justify-center bg-slate-900/20 border border-slate-800/40 rounded-3xl opacity-40">
                             <ZapOff size={42} className="text-slate-700 mb-6" />
                             <h2 className="text-xl font-black text-slate-500 uppercase tracking-[0.4em]">Flow Node Standby</h2>
-                            <p className="text-[10px] text-slate-600 font-black uppercase tracking-[0.2em] mt-3">Select a sequence to begin terminal inspection.</p>
+                            <p className="text-[10px] text-slate-600 font-black uppercase tracking-[0.2em] mt-3">Select a sequence to inspect.</p>
                         </div>
                     )}
                 </div>
             </div>
+
+            {/* Create Flow Modal */}
+            {showCreateModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md p-4">
+                    <motion.div
+                        initial={{ scale: 0.95, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        className="w-full max-w-md bg-slate-950 border border-slate-700/60 rounded-3xl shadow-2xl p-8 space-y-6"
+                    >
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <h2 className="text-xl font-bold text-white">New Email Flow</h2>
+                                <p className="text-xs text-slate-500 mt-1">Create a new automated sequence</p>
+                            </div>
+                            <button onClick={() => setShowCreateModal(false)} className="p-2 rounded-xl text-slate-600 hover:text-white bg-slate-800 transition-colors">
+                                ✕
+                            </button>
+                        </div>
+                        <div className="space-y-4">
+                            <div>
+                                <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] block mb-2">Flow Name *</label>
+                                <input
+                                    type="text"
+                                    value={newFlowName}
+                                    onChange={(e) => setNewFlowName(e.target.value)}
+                                    placeholder="e.g. 3-Month Onboarding"
+                                    className="w-full bg-slate-900 border border-slate-700 rounded-xl py-3 px-4 text-sm focus:outline-none focus:border-indigo-500 transition-all text-slate-200 placeholder:text-slate-600"
+                                    autoFocus
+                                />
+                            </div>
+                            <div>
+                                <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] block mb-2">Description</label>
+                                <textarea
+                                    rows={3}
+                                    value={newFlowDesc}
+                                    onChange={(e) => setNewFlowDesc(e.target.value)}
+                                    placeholder="What is this flow for?"
+                                    className="w-full bg-slate-900 border border-slate-700 rounded-xl py-3 px-4 text-sm focus:outline-none focus:border-indigo-500 transition-all text-slate-200 resize-none placeholder:text-slate-600"
+                                />
+                            </div>
+                        </div>
+                        <div className="flex gap-3">
+                            <button
+                                onClick={() => setShowCreateModal(false)}
+                                className="flex-1 py-3 rounded-xl bg-slate-800 text-slate-400 text-xs font-bold uppercase tracking-widest hover:bg-slate-700 transition-all"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleCreate}
+                                disabled={creating || !newFlowName.trim()}
+                                className="flex-1 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-2"
+                            >
+                                {creating ? (
+                                    <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                                ) : (
+                                    <><Plus size={14} /> Create Flow</>
+                                )}
+                            </button>
+                        </div>
+                    </motion.div>
+                </div>
+            )}
         </motion.div>
     );
 }
