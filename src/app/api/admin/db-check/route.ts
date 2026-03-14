@@ -5,11 +5,11 @@ import { Client } from "pg";
  * Diagnostics: check DB connection and properties table.
  */
 export async function GET(req: Request) {
-    const dbUrl = process.env.SUPABASE_DB_URL;
+    const dbUrl = process.env.SUPABASE_DB_URL || process.env.POSTGRES_URL;
     if (!dbUrl) {
         return NextResponse.json({
             ok: false,
-            error: "SUPABASE_DB_URL not set",
+            error: "SUPABASE_DB_URL or POSTGRES_URL not set",
         });
     }
 

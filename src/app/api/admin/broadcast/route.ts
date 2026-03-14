@@ -46,7 +46,7 @@ export async function POST(req: Request) {
 
         // 3. Create a broadcast log entry
         const broadcastId = crypto.randomUUID();
-        await supabaseAdmin.from("notification_broadcasts").insert({
+        const { error: broadcastError } = await supabaseAdmin.from("notification_broadcasts").insert({
             id: broadcastId,
             subject,
             message,
@@ -54,6 +54,15 @@ export async function POST(req: Request) {
             scope,
             recipients: recipients.length,
         });
+
+        if (broadcastError) {
+            console.error("Broadcast log error:", broadcastError);
+            return NextResponse.json({
+                error: "Failed to create broadcast log",
+                details: broadcastError.message,
+                code: broadcastError.code
+            }, { status: 500 });
+        }
 
         // 4. Insert one notification row per recipient
         const rows = recipients.map((u) => ({
@@ -69,17 +78,23 @@ export async function POST(req: Request) {
         // Batch insert in chunks of 100 to avoid payload limits
         const CHUNK = 100;
         for (let i = 0; i < rows.length; i += CHUNK) {
-            const { error } = await supabaseAdmin.from("notifications").insert(rows.slice(i, i + CHUNK));
-            if (error) {
-                console.error("Broadcast insert error:", error);
-                return NextResponse.json({ error: "Failed to insert notifications", details: error.message }, { status: 500 });
+            const chunk = rows.slice(i, i + CHUNK);
+            const { error: insertError } = await supabaseAdmin.from("notifications").insert(chunk);
+            if (insertError) {
+                console.error("Broadcast insert error:", i, insertError);
+                return NextResponse.json({
+                    error: "Failed to insert notifications",
+                    details: insertError.message,
+                    code: insertError.code,
+                    index: i
+                }, { status: 500 });
             }
         }
 
         return NextResponse.json({ success: true, recipients: recipients.length, broadcastId });
     } catch (error: any) {
-        console.error("Broadcast error:", error);
-        return NextResponse.json({ error: error.message }, { status: 500 });
+        console.error("Broadcast fatal error:", error);
+        return NextResponse.json({ error: error.message || "Internal Server Error" }, { status: 500 });
     }
 }
 

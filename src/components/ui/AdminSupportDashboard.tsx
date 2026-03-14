@@ -1161,7 +1161,10 @@ function AdminNotificationsView() {
                 throw new Error("Unauthorized. Please ensure you are signed into your Follio account.");
             }
 
-            if (!res.ok) throw new Error(data.error || "Broadcast mission failed at terminal.");
+            if (!res.ok) {
+                const detail = data.details ? `: ${data.details}` : "";
+                throw new Error(`${data.error || "Broadcast mission failed"}${detail}`);
+            }
 
             setSent(true);
             setSubject("");
