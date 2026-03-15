@@ -42,6 +42,7 @@ export interface Property {
     yearBuilt?: number;
     lotSize?: string;
     description?: string;
+    ticker?: string;
 }
 
 export const MOCK_PROPERTIES: Property[] = [];

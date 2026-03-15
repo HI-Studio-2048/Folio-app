@@ -140,8 +140,8 @@ export default function SignupPage() {
                                         icon={Briefcase}
                                         title={t("companyPortfolio")}
                                         description={t("companyPortfolioDesc")}
-                                        active={formData.portfolioType === "company"}
-                                        onClick={() => setFormData({ ...formData, portfolioType: "company", portfolioRole: "" })}
+                                        active={formData.portfolioType === "business"}
+                                        onClick={() => setFormData({ ...formData, portfolioType: "business", portfolioRole: "" })}
                                     />
                                     <PortfolioOption
                                         icon={TrendingUp}
@@ -230,7 +230,7 @@ export default function SignupPage() {
                                         </>
                                     )}
                                     {/* ... rest of options similarly ... */}
-                                    {formData.portfolioType === "company" && (
+                                    {formData.portfolioType === "business" && (
                                         <>
                                             <PortfolioOption icon={Building2} title={t("hedgeFund")} description={t("hedgeFundDesc")} active={formData.portfolioRole === "hedge_fund"} onClick={() => setFormData({ ...formData, portfolioRole: "hedge_fund" })} large />
                                             <PortfolioOption icon={TrendingUp} title={t("angelInvestor")} description={t("angelInvestorDesc")} active={formData.portfolioRole === "angel_investor"} onClick={() => setFormData({ ...formData, portfolioRole: "angel_investor" })} large />

@@ -16,8 +16,8 @@ const performanceData = [
     { month: "Aug", value: 7.5, cashflow: 0 },
 ];
 
-export function CompanyDashboard({
-    properties, // Note: In a real app we'd map "Company" specific types here
+export function BusinessDashboard({
+    properties,
     stats,
     t,
     currency,
@@ -27,7 +27,7 @@ export function CompanyDashboard({
 }: any) {
     return (
         <motion.div
-            key="dashboard-company"
+            key="dashboard-business"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.98 }}
@@ -35,7 +35,7 @@ export function CompanyDashboard({
             className="max-w-6xl mx-auto space-y-8"
         >
             <div>
-                <h1 className="text-3xl font-outfit font-bold text-white mb-2">{t("fundOverview" as any) || "Fund Overview"}</h1>
+                <h1 className="text-3xl font-outfit font-bold text-white mb-2">{t("businessPortfolio" as any) || "Business Portfolio"}</h1>
                 <p className="text-slate-400">Track your private equity and venture capital positions. <span className="text-emerald-400 font-medium">+24.5% IRR</span> {t("thisQuarter")}</p>
             </div>
 
@@ -91,7 +91,7 @@ export function CompanyDashboard({
                         <ResponsiveContainer width="100%" height="100%">
                             <AreaChart data={performanceData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                                 <defs>
-                                    <linearGradient id="colorValueCompany" x1="0" y1="0" x2="0" y2="1">
+                                    <linearGradient id="colorValueBusiness" x1="0" y1="0" x2="0" y2="1">
                                         <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.3} />
                                         <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0} />
                                     </linearGradient>
@@ -108,7 +108,7 @@ export function CompanyDashboard({
                                     contentStyle={{ backgroundColor: 'rgba(15, 23, 42, 0.9)', borderColor: '#334155', borderRadius: '8px', color: '#f8fafc' }}
                                     itemStyle={{ color: '#d8b4fe' }}
                                 />
-                                <Area type="monotone" dataKey="value" stroke="#8b5cf6" strokeWidth={3} fillOpacity={1} fill="url(#colorValueCompany)" />
+                                <Area type="monotone" dataKey="value" stroke="#8b5cf6" strokeWidth={3} fillOpacity={1} fill="url(#colorValueBusiness)" />
                             </AreaChart>
                         </ResponsiveContainer>
                     </div>

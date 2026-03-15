@@ -155,6 +155,75 @@ export function CollectionDashboard({
                     </button>
                 </div>
             </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="glass-card rounded-2xl p-6 border border-slate-700/30">
+                    <div className="flex items-center justify-between mb-6">
+                        <h2 className="text-lg font-outfit font-semibold text-white">Collection Distribution</h2>
+                        <div className="text-xs text-rose-400 font-medium">By Value</div>
+                    </div>
+                    <div className="space-y-4">
+                        {[
+                            { label: "Fine Art", value: 45, color: "bg-rose-500" },
+                            { label: "Luxury Watches", value: 25, color: "bg-amber-500" },
+                            { label: "Automotive", value: 20, color: "bg-blue-500" },
+                            { label: "Wine & Spirits", value: 10, color: "bg-emerald-500" },
+                        ].map((cat) => (
+                            <div key={cat.label} className="space-y-2">
+                                <div className="flex justify-between text-sm">
+                                    <span className="text-slate-300">{cat.label}</span>
+                                    <span className="text-slate-400 font-semibold">{cat.value}%</span>
+                                </div>
+                                <div className="h-2 w-full bg-slate-800 rounded-full overflow-hidden">
+                                    <motion.div
+                                        initial={{ width: 0 }}
+                                        animate={{ width: `${cat.value}%` }}
+                                        className={cn("h-full rounded-full", cat.color)}
+                                    />
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                <div className="glass-card rounded-2xl p-6 border border-slate-700/30">
+                    <div className="flex items-center justify-between mb-6">
+                        <h2 className="text-lg font-outfit font-semibold text-white">Provenance & Compliance</h2>
+                        <div className="flex items-center gap-2 px-2 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-md">
+                            <Shield size={12} className="text-emerald-400" />
+                            <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider">Secure</span>
+                        </div>
+                    </div>
+                    <div className="space-y-3">
+                        <div className="p-4 rounded-xl bg-slate-800/40 border border-slate-700/50 flex items-start gap-4">
+                            <div className="w-10 h-10 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+                                <Shield size={20} />
+                            </div>
+                            <div>
+                                <p className="text-sm font-semibold text-slate-200">92% AI-Verified Coverage</p>
+                                <p className="text-xs text-slate-400 mt-1">High-confidence authentication and provenance history attached to 42 assets.</p>
+                            </div>
+                        </div>
+                        <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-start gap-4">
+                            <div className="w-10 h-10 rounded-lg bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400">
+                                <TrendingUp size={20} />
+                            </div>
+                            <div>
+                                <p className="text-sm font-semibold text-amber-200">3 Appraisals Expiring Soon</p>
+                                <p className="text-xs text-slate-400 mt-1">Updates required for Basquiat study and 2 vintage Rolex models to maintain insurance coverage.</p>
+                            </div>
+                        </div>
+                        <div className="p-4 rounded-xl bg-blue-500/5 border border-slate-700/50 flex items-start gap-4 hover:bg-slate-800/50 transition-colors cursor-pointer group">
+                            <div className="w-10 h-10 rounded-lg bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-blue-400 group-hover:scale-110 transition-transform">
+                                <Plus size={20} />
+                            </div>
+                            <div>
+                                <p className="text-sm font-semibold text-slate-200">Request New Appraisal</p>
+                                <p className="text-xs text-slate-400 mt-1">Connect with verified Follio appraisers to update your collection's market value.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </motion.div>
     );
 }

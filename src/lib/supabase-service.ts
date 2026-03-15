@@ -32,6 +32,7 @@ export interface DbProperty {
     year_built?: number;
     lot_size?: string;
     description?: string;
+    ticker?: string;
 }
 
 export const mapDbToProperty = (db: any): Property => {
@@ -130,6 +131,7 @@ export const mapDbToProperty = (db: any): Property => {
         yearBuilt: db.year_built !== null ? Number(db.year_built) : undefined,
         lotSize: db.lot_size,
         description: db.description,
+        ticker: db.ticker,
     };
 };
 
@@ -173,6 +175,7 @@ export const mapPropertyToDb = (prop: Property, userId: string): DbProperty => {
         year_built: prop.yearBuilt,
         lot_size: prop.lotSize,
         description: prop.description,
+        ticker: prop.ticker,
     };
 };
 
@@ -242,6 +245,7 @@ export const supabaseService = {
         if (updates.type) dbUpdates.type = updates.type;
         if (updates.units) dbUpdates.units = updates.units;
         if (updates.image) dbUpdates.image = updates.image;
+        if (updates.ticker) dbUpdates.ticker = updates.ticker;
 
         const { data, error } = await supabase
             .from('properties')

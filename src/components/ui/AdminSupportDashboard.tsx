@@ -54,6 +54,7 @@ import {
 } from "recharts";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn, formatCurrency } from "@/lib/utils";
+import { AdminAffiliateView } from "./AdminAffiliateView";
 
 const engagementData = [
     { day: "Mon", visits: 120, actives: 45 },
@@ -133,6 +134,7 @@ export function AdminSupportDashboard({ activeTab = "Overview" }: { activeTab?: 
     if (activeTab === "Mass Notification") return <AdminNotificationsView />;
     if (activeTab === "Global Config") return <AdminConfigView />;
     if (activeTab === "Support Tickets") return <AdminSupportTicketsView />;
+    if (activeTab === "Affiliate Program") return <AdminAffiliateView />;
 
     return (
         <div className="space-y-8 pb-12">

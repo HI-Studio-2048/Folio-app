@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { Language, Currency, translations, TranslationKey } from "@/lib/translations";
 
-export type PortfolioType = "realEstate" | "company" | "stocks" | "collection";
+export type PortfolioType = "realEstate" | "business" | "stocks" | "collection";
 
 interface SettingsContextType {
     language: Language;

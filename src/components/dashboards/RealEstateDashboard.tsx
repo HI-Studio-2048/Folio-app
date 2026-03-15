@@ -298,9 +298,9 @@ export function RealEstateDashboard({
 
                 <div className="glass-card rounded-2xl p-4 sm:p-6 border border-slate-700/30 flex flex-col">
                     <div className="flex items-center justify-between mb-6">
-                        <h2 className="text-lg font-outfit font-semibold text-white">{t("activePipeline")}</h2>
+                        <h2 className="text-lg font-outfit font-semibold text-white">{t("activeAssets" as any) || "Recent Assets"}</h2>
                         <button
-                            onClick={() => setActiveTab?.("pipeline")}
+                            onClick={() => setActiveTab?.("portfolio")}
                             className="text-sm text-blue-400 hover:text-blue-300 font-medium"
                         >
                             {t("viewAll")}
@@ -351,7 +351,7 @@ export function RealEstateDashboard({
                         onClick={() => openAddModal?.()}
                         className="w-full mt-4 py-2.5 rounded-xl border border-dashed border-slate-700 text-slate-400 font-medium text-sm hover:text-white hover:border-slate-500 hover:bg-slate-800/30 transition-all flex items-center justify-center gap-2"
                     >
-                        <Plus size={16} /> {t("addToPipeline")}
+                        <Plus size={16} /> {t("addAsset")}
                     </button>
                 </div>
             </div>

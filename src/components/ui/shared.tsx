@@ -15,7 +15,8 @@ import {
     ChevronDown,
     Plus,
     Trash2,
-    LayoutDashboard
+    LayoutDashboard,
+    Gift
 } from "lucide-react";
 import { Droppable, Draggable } from "@hello-pangea/dnd";
 import { Property } from "@/lib/data";
@@ -186,7 +187,7 @@ export function NotificationDropdown() {
     );
 }
 
-export function SettingsDropdown() {
+export function SettingsDropdown({ onNavigate }: { onNavigate?: (tab: string) => void }) {
     const { language, currency, portfolioType, setLanguage, setCurrency, setPortfolioType } = useSettings();
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
@@ -292,8 +293,17 @@ export function SettingsDropdown() {
                         </div>
                     </div>
 
-                    <div className="p-3 bg-slate-950/40 border-t border-slate-800/60 text-center">
-                        <p className="text-[9px] text-slate-600 uppercase font-medium">Auto-Syncing with Cloud Profile</p>
+                    <div className="p-3 bg-slate-950/40 border-t border-slate-800/60 flex flex-col gap-1">
+                        <button
+                            onClick={() => {
+                                onNavigate?.("affiliates");
+                                setIsOpen(false);
+                            }}
+                            className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest text-purple-400 hover:bg-purple-500/10 hover:text-purple-300 transition-all border border-transparent hover:border-purple-500/20"
+                        >
+                            <Gift size={14} /> Affiliate Portal
+                        </button>
+                        <p className="text-[9px] text-slate-600 uppercase font-medium text-center mt-2">Auto-Syncing with Cloud Profile</p>
                     </div>
                 </div>
             )}

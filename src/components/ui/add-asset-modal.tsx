@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, UploadCloud, FileText, CheckCircle, Download, Link as LinkIcon, Loader2, ExternalLink, Sparkles, AlertCircle, Copy } from "lucide-react";
+import { X, UploadCloud, FileText, CheckCircle, Download, Link as LinkIcon, Loader2, ExternalLink, Sparkles, AlertCircle, Copy, Briefcase } from "lucide-react";
 import Papa from "papaparse";
 import { useSettings } from "@/components/ui/settings-provider";
 import { Property, PropertyStatus } from "@/lib/data";
@@ -16,9 +16,9 @@ interface AddAssetModalProps {
 }
 
 export function AddAssetModal({ isOpen, onClose, onAddAssets, initialStatus }: AddAssetModalProps) {
-    const { t } = useSettings();
+    const { t, portfolioType } = useSettings();
     const [isMounted, setIsMounted] = useState(false);
-    const [activeTab, setActiveTab] = useState<"manual" | "import" | "link">("manual");
+    const [activeTab, setActiveTab] = useState<"manual" | "import" | "link" | "accounting">("manual");
     const [listingUrl, setListingUrl] = useState("");
     const [isScraping, setIsScraping] = useState(false);
     const [scrapingError, setScrapingError] = useState("");
@@ -79,6 +79,7 @@ export function AddAssetModal({ isOpen, onClose, onAddAssets, initialStatus }: A
         yearBuilt: 0,
         lotSize: "",
         description: "",
+        ticker: "",
     });
 
     useEffect(() => {
@@ -165,6 +166,7 @@ export function AddAssetModal({ isOpen, onClose, onAddAssets, initialStatus }: A
             yearBuilt: formData.yearBuilt ? parseNumeric(formData.yearBuilt) : undefined,
             lotSize: formData.lotSize,
             description: formData.description,
+            ticker: formData.ticker,
         };
         onAddAssets([newAsset]);
         onClose();
@@ -448,6 +450,14 @@ export function AddAssetModal({ isOpen, onClose, onAddAssets, initialStatus }: A
                             >
                                 {t("importSpreadsheet")}
                             </button>
+                            {portfolioType === "business" && (
+                                <button
+                                    className={`pb-3 text-sm font-medium transition-colors border-b-2 ${activeTab === "accounting" ? "border-blue-500 text-blue-400" : "border-transparent text-slate-400 hover:text-slate-200"}`}
+                                    onClick={() => setActiveTab("accounting")}
+                                >
+                                    {t("accountingImport" as any) || "Accounting"}
+                                </button>
+                            )}
                         </div>
 
                         <div className="p-6 overflow-y-auto custom-scrollbar">
@@ -465,6 +475,18 @@ export function AddAssetModal({ isOpen, onClose, onAddAssets, initialStatus }: A
                                                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                             />
                                         </div>
+                                        {portfolioType === 'stocks' && (
+                                            <div className="space-y-2">
+                                                <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Ticker Symbol</label>
+                                                <input
+                                                    type="text"
+                                                    className="w-full bg-slate-950/50 border border-slate-700/50 rounded-lg px-4 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500/50 transition-all placeholder:text-slate-600 uppercase"
+                                                    value={formData.ticker}
+                                                    onChange={(e) => setFormData({ ...formData, ticker: e.target.value.toUpperCase() })}
+                                                    placeholder="e.g. AAPL, TSLA"
+                                                />
+                                            </div>
+                                        )}
                                         <div className="space-y-2 relative">
                                             <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">{t("propertyAddress")}</label>
                                             <input
@@ -1011,6 +1033,53 @@ export function AddAssetModal({ isOpen, onClose, onAddAssets, initialStatus }: A
                                             <p className="text-[10px] text-slate-500 uppercase font-bold tracking-widest mb-1">Included Assets</p>
                                             <p className="text-xs text-slate-300 font-medium">Photos, Price, Address, Specs</p>
                                         </div>
+                                    </div>
+                                </div>
+                            ) : activeTab === "accounting" ? (
+                                <div className="space-y-6 py-4">
+                                    <div className="bg-blue-500/5 border border-blue-500/10 rounded-xl p-5 flex gap-4 items-start mb-6 overflow-hidden relative">
+                                        <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 blur-3xl -mr-16 -mt-16"></div>
+                                        <div className="p-2 bg-blue-500/10 rounded-lg text-blue-400 shrink-0 relative z-10">
+                                            <Briefcase size={20} />
+                                        </div>
+                                        <div className="relative z-10">
+                                            <p className="text-sm font-semibold text-blue-200">{t("accountingImport" as any) || "Accounting Sync"}</p>
+                                            <p className="text-xs text-slate-400 mt-1">{t("accountingImportDesc" as any) || "Import real-time financial data from QuickBooks, Xero, or other accounting platforms."}</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 gap-4">
+                                        {[
+                                            { name: "QuickBooks", logo: "QB", color: "bg-green-600" },
+                                            { name: "Xero", logo: "X", color: "bg-blue-400" },
+                                            { name: "FreshBooks", logo: "FB", color: "bg-blue-600" },
+                                            { name: "Sage", logo: "S", color: "bg-green-500" }
+                                        ].map((software) => (
+                                            <button
+                                                key={software.name}
+                                                className="group flex items-center justify-between p-4 rounded-xl bg-slate-800/40 border border-slate-700/50 hover:bg-slate-800 hover:border-blue-500/50 transition-all shadow-lg"
+                                            >
+                                                <div className="flex items-center gap-4">
+                                                    <div className={`w-10 h-10 rounded-lg ${software.color} flex items-center justify-center font-bold text-white shadow-inner`}>
+                                                        {software.logo}
+                                                    </div>
+                                                    <div className="text-left">
+                                                        <p className="text-sm font-bold text-slate-200 group-hover:text-white transition-colors">{software.name}</p>
+                                                        <p className="text-[10px] text-slate-500 uppercase font-black tracking-widest mt-0.5">Real-time Financials</p>
+                                                    </div>
+                                                </div>
+                                                <div className="px-4 py-1.5 rounded-lg bg-blue-600/10 text-blue-400 text-xs font-bold border border-blue-500/20 group-hover:bg-blue-600 group-hover:text-white transition-all">
+                                                    {t("connectAccounting" as any) || "Connect"}
+                                                </div>
+                                            </button>
+                                        ))}
+                                    </div>
+
+                                    <div className="mt-8 p-4 rounded-xl border border-blue-500/20 bg-blue-500/5 flex items-center gap-4">
+                                        <Sparkles size={18} className="text-blue-400 shrink-0" />
+                                        <p className="text-xs text-slate-400 leading-relaxed font-medium">
+                                            Once connected, Follio will automatically sync your **Balance Sheet**, **P&L**, and **Cash Flow** statements into your business performance dashboard.
+                                        </p>
                                     </div>
                                 </div>
                             ) : (

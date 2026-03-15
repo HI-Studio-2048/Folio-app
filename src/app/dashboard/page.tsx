@@ -25,7 +25,8 @@ import {
     StickyNote,
     CreditCard,
     Server,
-    Terminal
+    Terminal,
+    Gift
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
@@ -35,11 +36,12 @@ import { MOCK_PROPERTIES, getPortfolioStats, Property, PropertyStatus } from "@/
 import { PipelineColumn, SidebarItem, StatCard, SettingsDropdown, AnimatedLogo, NotificationDropdown, CloudSyncStatus } from "@/components/ui/shared";
 import { useSettings } from "@/components/ui/settings-provider";
 import { AddAssetModal } from "@/components/ui/add-asset-modal";
+import { AddCollectionModal } from "@/components/ui/add-collection-modal";
 import { EditAssetModal } from "@/components/ui/EditAssetModal";
 import { UserButton, useUser } from "@clerk/nextjs";
 import { DragDropContext, DropResult } from "@hello-pangea/dnd";
 import { RealEstateDashboard } from "@/components/dashboards/RealEstateDashboard";
-import { CompanyDashboard } from "@/components/dashboards/CompanyDashboard";
+import { BusinessDashboard } from "@/components/dashboards/BusinessDashboard";
 import { StocksDashboard } from "@/components/dashboards/StocksDashboard";
 import { CollectionDashboard } from "@/components/dashboards/CollectionDashboard";
 import { PortfolioMapDashboard } from "@/components/dashboards/PortfolioMapDashboard";
@@ -55,6 +57,7 @@ import { PortfolioHealthModal } from "@/components/ui/PortfolioHealthModal";
 import { TutorialOverlay } from "@/components/ui/TutorialOverlay";
 import { StarterFlow } from "@/components/ui/StarterFlow";
 import { NotesSection } from "@/components/dashboards/NotesSection";
+import { UserAffiliateView } from "@/components/ui/UserAffiliateView";
 import { supabaseService, mapPropertyToDb } from "@/lib/supabase-service";
 import { supabase } from "@/lib/supabase";
 
@@ -91,6 +94,9 @@ function DashboardContent() {
 
     useEffect(() => {
         setIsMounted(true);
+        const tab = searchParams.get("tab");
+        if (tab) setActiveTab(tab);
+
         if (isLoaded) {
             if (effectiveUserId) {
                 const fetchFromSupabase = async () => {
@@ -131,7 +137,7 @@ function DashboardContent() {
                                 if (res.ok) {
                                     const json = await res.json();
                                     data = json.properties || [];
-                                    console.log(`[Persistence] API fallback returned ${data.length} assets`);
+                                    console.log(`[Persistence] API fallback returned ${data?.length || 0} assets`);
                                 }
                                 if (!data) throw supaErr;
                             } else throw supaErr;
@@ -475,15 +481,19 @@ function DashboardContent() {
                 <nav className="flex-1 space-y-1.5 overflow-y-auto custom-scrollbar">
                     <SidebarItem icon={Home} label={t("dashboardNav")} active={activeTab === "dashboard"} onClick={() => { setActiveTab("dashboard"); setIsSidebarOpen(false); }} />
                     <SidebarItem icon={MapIcon} label={t("portfolioMapNav")} active={activeTab === "portfolio"} onClick={() => { setActiveTab("portfolio"); setIsSidebarOpen(false); }} />
-                    <SidebarItem icon={Briefcase} label={t("pipelineNav")} active={activeTab === "pipeline"} onClick={() => { setActiveTab("pipeline"); setIsSidebarOpen(false); }} />
+                    {portfolioType === "business" && (
+                        <SidebarItem icon={Briefcase} label={t("pipelineNav")} active={activeTab === "pipeline"} onClick={() => { setActiveTab("pipeline"); setIsSidebarOpen(false); }} />
+                    )}
                     <SidebarItem icon={Bot} label={t("agentsNav" as any) || "AgentS"} active={activeTab === "agents"} onClick={() => { setActiveTab("agents"); setIsSidebarOpen(false); }} />
                     <SidebarItem icon={Users} label={t("collaboratorsNav")} active={activeTab === "collaborators"} onClick={() => { setActiveTab("collaborators"); setIsSidebarOpen(false); }} />
                     <SidebarItem icon={StickyNote} label={t("notesNav" as any) || "Notes"} active={activeTab === "notes"} onClick={() => { setActiveTab("notes"); setIsSidebarOpen(false); }} />
                     <SidebarItem icon={BarChart3} label={t("reportsNav")} active={activeTab === "reports"} onClick={() => { setActiveTab("reports"); setIsSidebarOpen(false); }} />
 
-                    <div className="pt-4 pb-2 px-2">
-                        <span className="text-[10px] font-bold text-slate-600 uppercase tracking-widest leading-none">Management</span>
+                    <div className="pt-8 pb-2 px-2 border-t border-slate-800/40 mt-4">
+                        <span className="text-[10px] font-bold text-slate-600 uppercase tracking-widest leading-none">Account Settings</span>
                     </div>
+                    <SidebarItem icon={Gift} label="Affiliate Dashboard" active={activeTab === "affiliates"} onClick={() => { setActiveTab("affiliates"); setIsSidebarOpen(false); }} />
+                    <SidebarItem icon={CreditCard} label="Billing & Plan" active={activeTab === "billing"} onClick={() => { setActiveTab("billing"); setIsSidebarOpen(false); }} />
                     {/* <Link href="/admin">
                         <div className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all group text-blue-500/80 hover:text-blue-400 hover:bg-blue-500/5 border border-transparent hover:border-blue-500/20">
                             <Shield size={18} className="text-blue-500/60 group-hover:text-blue-500 transition-colors" />
@@ -509,8 +519,7 @@ function DashboardContent() {
                             <TrendingUp size={12} /> {healthStatus}
                         </p>
                     </div>
-                    <SidebarItem icon={CreditCard} label="Billing" active={activeTab === "billing"} onClick={() => setActiveTab("billing")} />
-                    <SidebarItem icon={Settings} label={t("settingsNav")} />
+                    <SidebarItem icon={Settings} label={t("settingsNav")} active={activeTab === "config"} onClick={() => setActiveTab("config")} />
                     <div className="flex items-center gap-3 px-2 py-3 mt-2 rounded-xl hover:bg-slate-800/40 transition-colors cursor-pointer group">
                         <UserButton />
                         <div className="flex-1 min-w-0">
@@ -527,14 +536,14 @@ function DashboardContent() {
                         <span className="hover:text-slate-200 cursor-pointer transition-colors">{t("workspace")}</span>
                         <ChevronRight size={14} />
                         <span className="text-slate-100 font-medium">
-                            {activeTab === "dashboard" ? t("dashboardNav") : activeTab === "portfolio" ? t("portfolioMapNav") : activeTab === "pipeline" ? t("pipelineNav") : activeTab === "collaborators" ? t("collaboratorsNav") : activeTab === "agents" ? (t("agentsNav" as any) || "AgentS") : activeTab === "notes" ? (t("notesNav" as any) || "Notes") : activeTab === "billing" ? "Billing" : t("reportsNav")}
+                            {activeTab === "dashboard" ? t("dashboardNav") : activeTab === "portfolio" ? t("portfolioMapNav") : (activeTab === "pipeline" && portfolioType === "business") ? t("pipelineNav") : activeTab === "collaborators" ? t("collaboratorsNav") : activeTab === "agents" ? (t("agentsNav" as any) || "AgentS") : activeTab === "notes" ? (t("notesNav" as any) || "Notes") : activeTab === "billing" ? "Billing" : activeTab === "affiliates" ? "Partner Program" : t("reportsNav")}
                         </span>
                     </div>
 
                     <div className="flex items-center gap-6">
                         <CloudSyncStatus status={syncStatus} />
                         <NotificationDropdown />
-                        <SettingsDropdown />
+                        <SettingsDropdown onNavigate={(tab: string) => setActiveTab(tab)} />
                         <div className="flex items-center gap-4">
                             <div className="relative group">
                                 <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-400 transition-colors" />
@@ -592,8 +601,8 @@ function DashboardContent() {
                                             editProperty={editProperty}
                                         />
                                     )}
-                                    {portfolioType === "company" && (
-                                        <CompanyDashboard
+                                    {portfolioType === "business" && (
+                                        <BusinessDashboard
                                             properties={properties}
                                             stats={stats}
                                             t={t}
@@ -612,6 +621,7 @@ function DashboardContent() {
                                             locale={locale}
                                             setActiveTab={setActiveTab}
                                             openAddModal={openAddModal}
+                                            onAddAssets={handleAddAsset}
                                         />
                                     )}
                                     {portfolioType === "collection" && (
@@ -640,7 +650,7 @@ function DashboardContent() {
                                 />
                             )}
 
-                            {activeTab === "pipeline" && (
+                            {activeTab === "pipeline" && portfolioType === "stocks" && (
                                 <motion.div
                                     key="pipeline"
                                     initial={{ opacity: 0, y: 20 }}
@@ -656,53 +666,47 @@ function DashboardContent() {
                                     {isMounted && (
                                         <DragDropContext onDragEnd={onDragEnd}>
                                             <div className="flex-1 flex gap-6 overflow-x-auto pb-4 pipeline-scroll">
-                                                <PipelineColumn
-                                                    id="Lead / Prospect"
-                                                    title={t("leadProspect")}
-                                                    properties={properties.filter(p => p.status === "Lead / Prospect")}
-                                                    onAddClick={() => openAddModal("Lead / Prospect")}
-                                                    onEditClick={editProperty}
-                                                />
-                                                <PipelineColumn
-                                                    id="Under Analysis"
-                                                    title={t("underAnalysis")}
-                                                    properties={properties.filter(p => p.status === "Under Analysis")}
-                                                    onAddClick={() => openAddModal("Under Analysis")}
-                                                    onEditClick={editProperty}
-                                                    onRemove={removeProperty}
-                                                />
-                                                <PipelineColumn
-                                                    id="Offer Submitted"
-                                                    title={t("offerSubmitted")}
-                                                    properties={properties.filter(p => p.status === "Offer Submitted")}
-                                                    onAddClick={() => openAddModal("Offer Submitted")}
-                                                    onEditClick={editProperty}
-                                                    onRemove={removeProperty}
-                                                />
-                                                <PipelineColumn
-                                                    id="Under Contract"
-                                                    title={t("underContract")}
-                                                    properties={properties.filter(p => p.status === "Under Contract")}
-                                                    onAddClick={() => openAddModal("Under Contract")}
-                                                    onEditClick={editProperty}
-                                                    onRemove={removeProperty}
-                                                />
-                                                <PipelineColumn
-                                                    id="Incoming Asset"
-                                                    title={t("incomingAsset")}
-                                                    properties={properties.filter(p => p.status === "Incoming Asset")}
-                                                    onAddClick={() => openAddModal("Incoming Asset")}
-                                                    onEditClick={editProperty}
-                                                    onRemove={removeProperty}
-                                                />
-                                                <PipelineColumn
-                                                    id="Secured Asset"
-                                                    title={t("securedAsset") || "Secured Asset"}
-                                                    properties={properties.filter(p => ["Secured Asset", "Active", "Renovation"].includes(p.status))}
-                                                    onAddClick={() => openAddModal("Secured Asset")}
-                                                    onEditClick={editProperty}
-                                                    onRemove={removeProperty}
-                                                />
+                                                <>
+                                                    <PipelineColumn
+                                                        id="Lead / Prospect"
+                                                        title={t("watchlist" as any) || "Watchlist"}
+                                                        properties={properties.filter(p => p.status === "Lead / Prospect")}
+                                                        onAddClick={() => openAddModal("Lead / Prospect")}
+                                                        onEditClick={editProperty}
+                                                    />
+                                                    <PipelineColumn
+                                                        id="Under Analysis"
+                                                        title={t("analyzing" as any) || "Analyzing"}
+                                                        properties={properties.filter(p => p.status === "Under Analysis")}
+                                                        onAddClick={() => openAddModal("Under Analysis")}
+                                                        onEditClick={editProperty}
+                                                        onRemove={removeProperty}
+                                                    />
+                                                    <PipelineColumn
+                                                        id="Offer Submitted"
+                                                        title={t("readyToBuy" as any) || "Ready to Buy"}
+                                                        properties={properties.filter(p => p.status === "Offer Submitted")}
+                                                        onAddClick={() => openAddModal("Offer Submitted")}
+                                                        onEditClick={editProperty}
+                                                        onRemove={removeProperty}
+                                                    />
+                                                    <PipelineColumn
+                                                        id="Under Contract"
+                                                        title={t("partialPosition" as any) || "Partial Position"}
+                                                        properties={properties.filter(p => p.status === "Under Contract")}
+                                                        onAddClick={() => openAddModal("Under Contract")}
+                                                        onEditClick={editProperty}
+                                                        onRemove={removeProperty}
+                                                    />
+                                                    <PipelineColumn
+                                                        id="Secured Asset"
+                                                        title={t("coreHolding" as any) || "Core Holding"}
+                                                        properties={properties.filter(p => ["Secured Asset", "Active", "Secured"].includes(p.status))}
+                                                        onAddClick={() => openAddModal("Secured Asset")}
+                                                        onEditClick={editProperty}
+                                                        onRemove={removeProperty}
+                                                    />
+                                                </>
                                             </div>
                                         </DragDropContext>
                                     )}
@@ -734,6 +738,32 @@ function DashboardContent() {
                             {activeTab === "billing" && (
                                 <BillingDashboard />
                             )}
+
+                            {activeTab === "affiliates" && (
+                                <UserAffiliateView />
+                            )}
+
+                            {activeTab === "config" && (
+                                <div className="max-w-4xl mx-auto py-20 text-center glass-card rounded-[2.5rem] border border-slate-800/60 bg-slate-950/20 backdrop-blur-xl space-y-6">
+                                    <div className="w-20 h-20 bg-slate-900 rounded-3xl flex items-center justify-center mx-auto border border-slate-800 shadow-2xl">
+                                        <Settings size={40} className="text-slate-600" />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <h2 className="text-3xl font-outfit font-black text-white uppercase tracking-tight">Workspace Configuration</h2>
+                                        <p className="text-slate-500 text-lg max-w-lg mx-auto leading-relaxed font-medium">
+                                            Detailed account and workspace settings are being migrated to this central node.
+                                            <br />
+                                            <span className="text-blue-500/80">Use the header settings for instant adjustments.</span>
+                                        </p>
+                                    </div>
+                                    <div className="pt-8 flex justify-center gap-4">
+                                        <button onClick={() => setActiveTab("dashboard")} className="px-8 py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl text-xs font-bold uppercase tracking-widest transition-all border border-slate-800">Return to Node</button>
+                                        <button onClick={() => setActiveTab("affiliates")} className="px-8 py-3 bg-purple-600 hover:bg-purple-500 text-white rounded-2xl text-xs font-bold uppercase tracking-widest transition-all shadow-xl shadow-purple-600/20 flex items-center gap-2">
+                                            <Gift size={14} /> Partner Portal
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
                         </AnimatePresence>
                     )}
                 </div>
@@ -748,12 +778,21 @@ function DashboardContent() {
                 </AnimatePresence>
             </main>
 
-            <AddAssetModal
-                isOpen={isAddModalOpen}
-                onClose={() => setIsAddModalOpen(false)}
-                onAddAssets={handleAddAsset}
-                initialStatus={initialStatus}
-            />
+            {portfolioType === "collection" ? (
+                <AddCollectionModal
+                    isOpen={isAddModalOpen}
+                    onClose={() => setIsAddModalOpen(false)}
+                    onAddAssets={handleAddAsset}
+                    initialStatus={initialStatus}
+                />
+            ) : (
+                <AddAssetModal
+                    isOpen={isAddModalOpen}
+                    onClose={() => setIsAddModalOpen(false)}
+                    onAddAssets={handleAddAsset}
+                    initialStatus={initialStatus}
+                />
+            )}
             <EditAssetModal
                 isOpen={isEditModalOpen}
                 onClose={() => setIsEditModalOpen(false)}
