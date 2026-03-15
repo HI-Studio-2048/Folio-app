@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Outfit } from "next/font/google";
 import { SettingsProvider } from "@/components/ui/settings-provider";
+import { AffiliateTracker } from "@/components/ui/AffiliateTracker";
 import "./globals.css";
 
 const inter = Inter({
@@ -34,6 +35,7 @@ export default function RootLayout({
           <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 pointer-events-none z-0"></div>
           <div className="absolute inset-0 bg-gradient-to-tr from-[#06080F] via-slate-900/80 to-[#1e1b4b]/20 z-0 pointer-events-none"></div>
           <SettingsProvider>
+            <AffiliateTracker />
             {children}
           </SettingsProvider>
         </body>

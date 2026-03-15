@@ -97,6 +97,18 @@ function DashboardContent() {
         const tab = searchParams.get("tab");
         if (tab) setActiveTab(tab);
 
+        // Affiliate Attribution Logic
+        const storedRef = typeof window !== 'undefined' ? localStorage.getItem("affiliate_ref") : null;
+        if (storedRef && isLoaded && user) {
+            fetch("/api/user/affiliate/attribute", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ refCode: storedRef })
+            }).then(() => {
+                localStorage.removeItem("affiliate_ref");
+            }).catch(e => console.error("Affiliate attribution failed", e));
+        }
+
         if (isLoaded) {
             if (effectiveUserId) {
                 const fetchFromSupabase = async () => {

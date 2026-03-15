@@ -181,7 +181,7 @@ export function AdminAffiliateView() {
                         <Gift className="text-purple-400" />
                         Affiliate Program
                     </h1>
-                    <p className="text-slate-400 text-sm">One-level downline · 30% direct · 10% on sub-referral earnings.</p>
+                    <p className="text-slate-400 text-sm">Multi-tier Team Builder · 30% direct commission · 10% on partner referral earnings.</p>
                 </div>
                 <div className="flex items-center gap-3">
                     <button
@@ -208,7 +208,7 @@ export function AdminAffiliateView() {
                         <span className="text-3xl font-black text-white">30%</span>
                         <span className="text-xs text-slate-400">direct commission</span>
                     </div>
-                    <p className="text-[11px] text-slate-500">+ <span className="text-blue-400 font-bold">10%</span> of sub-affiliate commissions</p>
+                    <p className="text-[11px] text-slate-500">+ <span className="text-blue-400 font-bold">10%</span> of partner-team commissions</p>
                 </div>
                 <div className="p-5 rounded-2xl bg-gradient-to-br from-amber-600/10 to-amber-900/5 border border-amber-500/20 space-y-1">
                     <div className="flex items-center gap-2">
@@ -219,10 +219,10 @@ export function AdminAffiliateView() {
                         <span className="text-3xl font-black text-white">40%</span>
                         <span className="text-xs text-slate-400">direct commission</span>
                     </div>
-                    <p className="text-[11px] text-slate-500">+ <span className="text-amber-400 font-bold">10%</span> of sub-affiliate commissions</p>
+                    <p className="text-[11px] text-slate-500">+ <span className="text-amber-400 font-bold">10%</span> of partner-team commissions</p>
                 </div>
                 <div className="p-5 rounded-2xl bg-gradient-to-br from-purple-600/10 to-purple-900/5 border border-purple-500/20 space-y-1">
-                    <p className="text-[10px] font-black text-purple-400 uppercase tracking-[0.2em]">Downline Structure</p>
+                    <p className="text-[10px] font-black text-purple-400 uppercase tracking-[0.2em]">Team Earnings Structure</p>
                     <div className="flex items-center gap-3 py-2">
                         <div className="text-center">
                             <div className="w-8 h-8 rounded-full bg-purple-500/20 border border-purple-500/40 flex items-center justify-center mx-auto mb-1">
@@ -242,7 +242,7 @@ export function AdminAffiliateView() {
                             <div className="w-8 h-8 rounded-full bg-slate-700 border border-slate-600 flex items-center justify-center mx-auto mb-1">
                                 <Users size={12} className="text-slate-400" />
                             </div>
-                            <p className="text-[9px] text-slate-500">Sub-affiliate</p>
+                            <p className="text-[9px] text-slate-500">Sub-Partner</p>
                         </div>
                     </div>
                     <p className="text-[11px] text-slate-500 leading-relaxed">1 level deep. Follio retains 60–70% of subscription revenue.</p>
@@ -453,7 +453,7 @@ export function AdminAffiliateView() {
                             <div className="grid grid-cols-4 divide-x divide-slate-800/60 border-b border-slate-800/60">
                                 {[
                                     { label: "Direct Cut", value: `${selectedAffiliate.commission_pct}%`, color: "text-purple-400" },
-                                    { label: "Downline Cut", value: `${selectedAffiliate.downline_pct}%`, color: "text-blue-400" },
+                                    { label: "Team Referral Bonus", value: `${selectedAffiliate.downline_pct}%`, color: "text-blue-400" },
                                     { label: "Total Earned", value: `$${(selectedAffiliate.total_earned || 0).toLocaleString()}`, color: "text-white" },
                                     { label: "Pending", value: `$${(selectedAffiliate.pending_payout || 0).toFixed(2)}`, color: "text-amber-400" },
                                 ].map((stat, i) => (

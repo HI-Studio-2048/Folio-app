@@ -99,8 +99,8 @@ export function UserAffiliateView() {
                         />
                         <BenefitCard
                             icon={Users}
-                            title="L2 Downline"
-                            desc="Earn an extra 10% on the earnings of anyone you refer who becomes an affiliate."
+                            title="Build Your Team"
+                            desc="Earn a 10% bonus on top of the earnings of any partner you refer to Follio."
                         />
                         <BenefitCard
                             icon={Wallet}
@@ -258,7 +258,7 @@ export function UserAffiliateView() {
                             <h3 className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em]">Partner Benefits</h3>
                             <BenefitMini icon={Check} text="Recurring lifetime payments" />
                             <BenefitMini icon={Check} text="24/7 conversion tracking" />
-                            <BenefitMini icon={Check} text="10% 2nd tier commissions" />
+                            <BenefitMini icon={Check} text="10% Partner Team commissions" />
                             <BenefitMini icon={Check} text="Direct partner support" />
                         </div>
 
