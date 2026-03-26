@@ -26,7 +26,8 @@ import {
     CreditCard,
     Server,
     Terminal,
-    Gift
+    Gift,
+    Store
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
@@ -492,6 +493,7 @@ function DashboardContent() {
 
                 <nav className="flex-1 space-y-1.5 overflow-y-auto custom-scrollbar">
                     <SidebarItem icon={Home} label={t("dashboardNav")} active={activeTab === "dashboard"} onClick={() => { setActiveTab("dashboard"); setIsSidebarOpen(false); }} />
+                    <SidebarItem icon={Store} label="Marketplace" onClick={() => router.push('/marketplace')} />
                     <SidebarItem icon={MapIcon} label={t("portfolioMapNav")} active={activeTab === "portfolio"} onClick={() => { setActiveTab("portfolio"); setIsSidebarOpen(false); }} />
                     {portfolioType === "business" && (
                         <SidebarItem icon={Briefcase} label={t("pipelineNav")} active={activeTab === "pipeline"} onClick={() => { setActiveTab("pipeline"); setIsSidebarOpen(false); }} />

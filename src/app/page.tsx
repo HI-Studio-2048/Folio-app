@@ -54,6 +54,9 @@ export default function LandingPage() {
           <Link href="#pricing" className="hidden lg:inline-block text-sm font-medium text-slate-300 hover:text-white transition-colors">
             {t("pricingNav")}
           </Link>
+          <Link href="/marketplace" className="hidden lg:inline-block text-sm font-bold text-blue-400 hover:text-blue-300 transition-colors">
+            Marketplace
+          </Link>
           {isLoaded && !isSignedIn && (
             <div className="flex items-center gap-2 md:gap-4">
               <SignInButton mode="modal" fallbackRedirectUrl="/dashboard" forceRedirectUrl="/dashboard">
