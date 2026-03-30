@@ -3,64 +3,18 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-    Users, DollarSign, TrendingUp, Link2, Copy, Check, ChevronRight,
-    Plus, Crown, Zap, Gift, BarChart2, ArrowUpRight, AlertCircle,
-    Wallet, Send, RefreshCw, Star, Shield, X, ExternalLink, Search
+    Users, DollarSign, TrendingUp, Copy, Check, ChevronRight,
+    Plus, Crown, Gift, ArrowUpRight, AlertCircle,
+    Wallet, Send, RefreshCw, Star, Shield, X, Search
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-// Commission structure config
-const COMMISSION_STRUCTURE = {
-    standard: { direct: 30, downline: 10, label: "Standard", color: "blue" },
-    elite: { direct: 40, downline: 10, label: "Elite", color: "amber" },
-};
-
-const MOCK_AFFILIATES = [
-    {
-        id: "aff-001", user_id: "demo_001", name: "David Sterling", email: "david@sterling-res.com",
-        ref_code: "DAVID42", tier: "elite", commission_pct: 40, downline_pct: 10, status: "active",
-        payout_email: "david@paypal.me", total_clicks: 1842, total_conversions: 48,
-        total_earned: 5614.80, pending_payout: 980.00, created_at: "2026-01-15T00:00:00Z",
-        conversions: [
-            { id: "c1", amount_usd: 90, commission_earned: 36.00, status: "confirmed", created_at: "2026-03-10T10:00:00Z" },
-            { id: "c2", amount_usd: 490, commission_earned: 196.00, status: "confirmed", created_at: "2026-03-08T10:00:00Z" },
-            { id: "c3", amount_usd: 90, commission_earned: 36.00, status: "pending", created_at: "2026-03-14T10:00:00Z" },
-        ],
-        payouts: [
-            { id: "p1", amount: 1200, status: "paid", paid_at: "2026-02-01T00:00:00Z" },
-            { id: "p2", amount: 800, status: "paid", paid_at: "2026-03-01T00:00:00Z" },
-        ],
-    },
-    {
-        id: "aff-002", user_id: "demo_002", name: "Emma Rodriguez", email: "emma.rod@outlook.com",
-        ref_code: "EMMAF5", tier: "standard", commission_pct: 30, downline_pct: 10, status: "active",
-        payout_email: "emma@paypal.me", total_clicks: 612, total_conversions: 14,
-        total_earned: 1215.60, pending_payout: 290.00, created_at: "2026-02-01T00:00:00Z",
-        conversions: [
-            { id: "c4", amount_usd: 90, commission_earned: 27.00, status: "confirmed", created_at: "2026-03-12T10:00:00Z" },
-            { id: "c5", amount_usd: 90, commission_earned: 27.00, status: "pending", created_at: "2026-03-14T10:00:00Z" },
-        ],
-        payouts: [
-            { id: "p3", amount: 290, status: "paid", paid_at: "2026-03-01T00:00:00Z" },
-        ],
-    },
-    {
-        id: "aff-003", user_id: "demo_003", name: "Michael Chen", email: "m.chen@venture-capital.io",
-        ref_code: "MCHEN9", tier: "standard", commission_pct: 30, downline_pct: 10, status: "active",
-        payout_email: null, total_clicks: 274, total_conversions: 5,
-        total_earned: 435.00, pending_payout: 435.00, created_at: "2026-02-20T00:00:00Z",
-        conversions: [
-            { id: "c6", amount_usd: 490, commission_earned: 147.00, status: "confirmed", created_at: "2026-03-05T10:00:00Z" },
-        ],
-        payouts: [],
-    },
-];
 
 export function AdminAffiliateView() {
-    const [affiliates, setAffiliates] = useState<any[]>(MOCK_AFFILIATES);
+    const [affiliates, setAffiliates] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [dbMissing, setDbMissing] = useState(false);
-    const [selectedAffiliate, setSelectedAffiliate] = useState<any>(MOCK_AFFILIATES[0]);
+    const [selectedAffiliate, setSelectedAffiliate] = useState<any>(null);
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [showPayoutModal, setShowPayoutModal] = useState(false);
     const [copiedCode, setCopiedCode] = useState<string | null>(null);
@@ -76,14 +30,20 @@ export function AdminAffiliateView() {
         try {
             const res = await fetch("/api/admin/affiliates");
             const data = await res.json();
-            if (Array.isArray(data) && data.length > 0) {
-                setAffiliates(data);
-                setSelectedAffiliate(data[0]);
-            } else if (data?.error?.includes("does not exist")) {
+            if (res.status === 403) {
                 setDbMissing(true);
+                return;
+            }
+            if (data?.error) {
+                setDbMissing(true);
+                return;
+            }
+            if (Array.isArray(data)) {
+                setAffiliates(data);
+                setSelectedAffiliate(data[0] ?? null);
             }
         } catch (e) {
-            // keep mock data
+            setDbMissing(true);
         } finally {
             setIsLoading(false);
         }
@@ -92,7 +52,8 @@ export function AdminAffiliateView() {
     useEffect(() => { fetchAffiliates(); }, []);
 
     const handleCopyCode = (code: string) => {
-        navigator.clipboard.writeText(`https://follio.app/signup?ref=${code}`);
+        const base = typeof window !== "undefined" ? window.location.origin : "";
+        navigator.clipboard.writeText(`${base}/r/${code}`);
         setCopiedCode(code);
         setTimeout(() => setCopiedCode(null), 2000);
     };
@@ -170,6 +131,28 @@ export function AdminAffiliateView() {
     const totalConversions = affiliates.reduce((s, a) => s + (a.total_conversions || 0), 0);
     const totalClicks = affiliates.reduce((s, a) => s + (a.total_clicks || 0), 0);
     const convRate = totalClicks > 0 ? ((totalConversions / totalClicks) * 100).toFixed(1) : "0.0";
+
+    if (isLoading) {
+        return (
+            <div className="flex flex-col items-center justify-center p-20 space-y-4">
+                <div className="w-10 h-10 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
+                <p className="text-slate-500 text-xs font-bold uppercase tracking-widest">Loading Affiliate Data...</p>
+            </div>
+        );
+    }
+
+    if (dbMissing) {
+        return (
+            <div className="flex flex-col items-center justify-center p-20 space-y-4 text-center">
+                <AlertCircle size={40} className="text-red-400" />
+                <p className="text-white font-bold">Unable to load affiliate data</p>
+                <p className="text-slate-500 text-sm max-w-xs">Check that the database tables exist and your admin role is set in Clerk.</p>
+                <button onClick={fetchAffiliates} className="px-4 py-2 rounded-xl bg-slate-800 border border-slate-700 text-white text-xs font-bold hover:bg-slate-700 transition-all">
+                    Retry
+                </button>
+            </div>
+        );
+    }
 
     return (
         <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-8">

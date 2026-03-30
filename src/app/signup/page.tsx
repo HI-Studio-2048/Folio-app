@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useUser } from "@clerk/nextjs";
 import { motion, AnimatePresence } from "framer-motion";
 import {
     LayoutDashboard,
@@ -29,7 +30,22 @@ import { useRouter } from "next/navigation";
 export default function SignupPage() {
     const { t, setPortfolioType, setOnboardingCompleted } = useSettings();
     const router = useRouter();
+    const { isSignedIn } = useUser();
     const [step, setStep] = useState(1);
+
+    // Attribution: when user is signed in, send any stored ref code to the API
+    useEffect(() => {
+        if (!isSignedIn) return;
+        const refCode = localStorage.getItem("affiliate_ref");
+        if (!refCode) return;
+        fetch("/api/user/affiliate/attribute", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ refCode }),
+        }).then(() => {
+            localStorage.removeItem("affiliate_ref");
+        }).catch(() => {});
+    }, [isSignedIn]);
     const [formData, setFormData] = useState({
         portfolioType: "" as any,
         portfolioRole: "",

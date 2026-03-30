@@ -84,7 +84,7 @@ export const translations = {
         pricingNav: "Pricing",
         dashboardNav: "Dashboard",
         portfolioMapNav: "Portfolio Map",
-        pipelineNav: "Pipeline",
+        pipelineNav: "Acquisitions",
         collaboratorsNav: "Collaborators",
         reportsNav: "Reports",
         settingsNav: "Settings",

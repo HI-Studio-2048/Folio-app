@@ -63,7 +63,19 @@ export async function POST(req: Request) {
             });
         }
 
-        // 3. Create Checkout Session
+        // 3. Look up affiliate attribution for this user
+        let affiliateRefCode: string | null = null;
+        const { data: conversion } = await supabase
+            .from("affiliate_conversions")
+            .select("affiliate_id, affiliates(ref_code)")
+            .eq("referred_user_id", userId)
+            .eq("status", "pending")
+            .single();
+        if (conversion?.affiliates) {
+            affiliateRefCode = (conversion.affiliates as any).ref_code;
+        }
+
+        // 4. Create Checkout Session
         const session = await stripe.checkout.sessions.create({
             customer: stripeCustomerId,
             line_items: [
@@ -78,6 +90,7 @@ export async function POST(req: Request) {
             metadata: {
                 userId,
                 plan,
+                ...(affiliateRefCode ? { affiliateRefCode } : {}),
             },
         });
 

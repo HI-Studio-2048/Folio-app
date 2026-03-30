@@ -3,9 +3,9 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-    Gift, Link2, Copy, Check, Users, DollarSign,
-    TrendingUp, Wallet, ArrowUpRight, Shield, Star,
-    ChevronRight, Sparkles, Send, Clock, CircleDot
+    Gift, Copy, Check, Users, DollarSign,
+    TrendingUp, Wallet, Shield, Star,
+    Sparkles, Clock, CircleDot, X, Send
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -14,6 +14,11 @@ export function UserAffiliateView() {
     const [isLoading, setIsLoading] = useState(true);
     const [isJoining, setIsJoining] = useState(false);
     const [copied, setCopied] = useState(false);
+    const [showPayoutModal, setShowPayoutModal] = useState(false);
+    const [payoutEmail, setPayoutEmail] = useState("");
+    const [payoutMethod, setPayoutMethod] = useState<"paypal" | "stripe">("paypal");
+    const [isRequestingPayout, setIsRequestingPayout] = useState(false);
+    const [payoutSuccess, setPayoutSuccess] = useState(false);
 
     const fetchProfile = async () => {
         setIsLoading(true);
@@ -51,10 +56,36 @@ export function UserAffiliateView() {
 
     const copyLink = () => {
         if (!affiliate) return;
-        const link = `https://follio.app/signup?ref=${affiliate.ref_code}`;
+        const base = typeof window !== "undefined" ? window.location.origin : "https://follio.app";
+        const link = `${base}/signup?ref=${affiliate.ref_code}`;
         navigator.clipboard.writeText(link);
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
+    };
+
+    const handleRequestPayout = async () => {
+        if (!payoutEmail) return;
+        setIsRequestingPayout(true);
+        try {
+            const res = await fetch("/api/user/affiliate/payout", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ method: payoutMethod, payoutEmail }),
+            });
+            if (res.ok) {
+                setPayoutSuccess(true);
+                await fetchProfile();
+                setTimeout(() => {
+                    setShowPayoutModal(false);
+                    setPayoutSuccess(false);
+                    setPayoutEmail("");
+                }, 2000);
+            }
+        } catch (e) {
+            console.error("Payout request failed", e);
+        } finally {
+            setIsRequestingPayout(false);
+        }
     };
 
     if (isLoading) {
@@ -126,6 +157,14 @@ export function UserAffiliateView() {
 
     // Stats calculations
     const teamEarnings = affiliate?.conversions?.reduce((sum: number, c: any) => sum + (c.downline_earned || 0), 0) || 0;
+
+    // Per-team-member earnings: sum downline_earned for each referred_user_id
+    const earningsByUser: Record<string, number> = {};
+    affiliate?.conversions?.forEach((c: any) => {
+        if (c.downline_earned && c.referred_user_id) {
+            earningsByUser[c.referred_user_id] = (earningsByUser[c.referred_user_id] || 0) + c.downline_earned;
+        }
+    });
 
     const stats = [
         { label: "Total Earned", value: `$${((affiliate.total_earned || 0) + teamEarnings).toLocaleString()}`, icon: DollarSign, color: "text-emerald-400" },
@@ -354,7 +393,9 @@ export function UserAffiliateView() {
                                         </div>
                                         <div className="text-right">
                                             <p className="text-xs text-slate-500 uppercase tracking-widest font-black mb-1">Team Cut Earned</p>
-                                            <p className="text-lg font-mono font-black text-white">$0.00</p>
+                                            <p className="text-lg font-mono font-black text-white">
+                                                ${(earningsByUser[member.user_id] || 0).toFixed(2)}
+                                            </p>
                                         </div>
                                     </div>
                                 ))
@@ -382,26 +423,42 @@ export function UserAffiliateView() {
 
             {activeTab === "history" && (
                 <div className="space-y-6">
-                    <h2 className="text-xl font-outfit font-bold text-white flex items-center gap-2">
-                        Payout & Balance History
-                    </h2>
+                    <div className="flex items-center justify-between">
+                        <h2 className="text-xl font-outfit font-bold text-white">Payout & Balance History</h2>
+                        {(affiliate.pending_payout || 0) > 0 && (
+                            <button
+                                onClick={() => setShowPayoutModal(true)}
+                                className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-black uppercase tracking-widest transition-all shadow-lg shadow-purple-600/20 active:scale-95"
+                            >
+                                <Send size={14} />
+                                Request Payout · ${(affiliate.pending_payout || 0).toFixed(2)}
+                            </button>
+                        )}
+                    </div>
 
                     <div className="glass-card rounded-2xl border border-slate-800 overflow-hidden divide-y divide-slate-800/60">
                         {affiliate.payouts && affiliate.payouts.length > 0 ? (
                             affiliate.payouts.map((payout: any, i: number) => (
                                 <div key={i} className="p-6 flex items-center justify-between hover:bg-white/[0.02] transition-colors">
                                     <div className="flex items-center gap-4">
-                                        <div className="w-10 h-10 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
-                                            <Check size={20} />
+                                        <div className={cn(
+                                            "w-10 h-10 rounded-full border flex items-center justify-center",
+                                            payout.status === "paid"
+                                                ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
+                                                : "bg-amber-500/10 border-amber-500/20 text-amber-400"
+                                        )}>
+                                            {payout.status === "paid" ? <Check size={18} /> : <Clock size={18} />}
                                         </div>
                                         <div>
-                                            <p className="text-sm font-bold text-white">Funds Disbursed</p>
-                                            <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold">Via {payout.method || 'Default Method'}</p>
+                                            <p className="text-sm font-bold text-white capitalize">{payout.status === "paid" ? "Funds Disbursed" : "Processing"}</p>
+                                            <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold">Via {payout.method || "Default Method"}</p>
                                         </div>
                                     </div>
                                     <div className="text-right">
                                         <div className="text-white font-black text-lg mb-0.5">${(payout.amount || 0).toFixed(2)}</div>
-                                        <div className="text-[10px] text-slate-600 font-bold uppercase tracking-widest">{payout.paid_at ? new Date(payout.paid_at).toLocaleDateString() : 'Processing'}</div>
+                                        <div className="text-[10px] text-slate-600 font-bold uppercase tracking-widest">
+                                            {payout.paid_at ? new Date(payout.paid_at).toLocaleDateString() : "Pending"}
+                                        </div>
                                     </div>
                                 </div>
                             ))
@@ -411,11 +468,99 @@ export function UserAffiliateView() {
                                     <Wallet size={32} />
                                 </div>
                                 <p className="text-slate-500 text-sm">No payout history recorded yet.</p>
+                                {(affiliate.pending_payout || 0) > 0 && (
+                                    <button
+                                        onClick={() => setShowPayoutModal(true)}
+                                        className="mx-auto flex items-center gap-2 px-6 py-3 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-black uppercase tracking-widest transition-all"
+                                    >
+                                        <Send size={14} />
+                                        Request Your First Payout
+                                    </button>
+                                )}
                             </div>
                         )}
                     </div>
                 </div>
             )}
+
+            {/* Payout Modal */}
+            <AnimatePresence>
+                {showPayoutModal && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+                        onClick={(e) => { if (e.target === e.currentTarget) setShowPayoutModal(false); }}
+                    >
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                            className="w-full max-w-md bg-slate-900 border border-slate-700 rounded-3xl p-8 space-y-6 shadow-2xl"
+                        >
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <h3 className="text-xl font-outfit font-black text-white">Request Payout</h3>
+                                    <p className="text-slate-500 text-sm mt-1">Available balance: <span className="text-purple-400 font-bold">${(affiliate.pending_payout || 0).toFixed(2)}</span></p>
+                                </div>
+                                <button onClick={() => setShowPayoutModal(false)} className="p-2 rounded-xl hover:bg-slate-800 text-slate-500 hover:text-white transition-colors">
+                                    <X size={20} />
+                                </button>
+                            </div>
+
+                            <div className="space-y-4">
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Payout Method</label>
+                                    <div className="grid grid-cols-2 gap-3">
+                                        {(["paypal", "stripe"] as const).map((m) => (
+                                            <button
+                                                key={m}
+                                                onClick={() => setPayoutMethod(m)}
+                                                className={cn(
+                                                    "py-3 rounded-xl text-sm font-bold capitalize transition-all border",
+                                                    payoutMethod === m
+                                                        ? "bg-purple-600/20 border-purple-500 text-purple-300"
+                                                        : "bg-slate-800 border-slate-700 text-slate-400 hover:border-slate-600"
+                                                )}
+                                            >
+                                                {m === "paypal" ? "PayPal" : "Stripe"}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">
+                                        {payoutMethod === "paypal" ? "PayPal Email" : "Stripe Email"}
+                                    </label>
+                                    <input
+                                        type="email"
+                                        value={payoutEmail}
+                                        onChange={(e) => setPayoutEmail(e.target.value)}
+                                        placeholder={`Enter your ${payoutMethod === "paypal" ? "PayPal" : "Stripe"} email`}
+                                        className="w-full px-4 py-3 rounded-xl bg-slate-800 border border-slate-700 text-white placeholder-slate-600 text-sm focus:outline-none focus:border-purple-500 transition-colors"
+                                    />
+                                </div>
+                            </div>
+
+                            <button
+                                onClick={handleRequestPayout}
+                                disabled={!payoutEmail || isRequestingPayout}
+                                className="w-full py-4 rounded-2xl bg-purple-600 hover:bg-purple-500 text-white font-black flex items-center justify-center gap-2 transition-all shadow-xl shadow-purple-600/20 disabled:opacity-40 disabled:cursor-not-allowed"
+                            >
+                                {payoutSuccess ? (
+                                    <><Check size={18} /> Payout Requested!</>
+                                ) : isRequestingPayout ? (
+                                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                ) : (
+                                    <><Send size={18} /> Send ${(affiliate.pending_payout || 0).toFixed(2)}</>
+                                )}
+                            </button>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </motion.div>
     );
 }

@@ -22,6 +22,7 @@ import {
     Menu,
     X,
     Shield,
+    ShieldCheck,
     StickyNote,
     CreditCard,
     Server,
@@ -496,7 +497,7 @@ function DashboardContent() {
                     <SidebarItem icon={Store} label="Marketplace" onClick={() => router.push('/marketplace')} />
                     <SidebarItem icon={MapIcon} label={t("portfolioMapNav")} active={activeTab === "portfolio"} onClick={() => { setActiveTab("portfolio"); setIsSidebarOpen(false); }} />
                     {portfolioType === "business" && (
-                        <SidebarItem icon={Briefcase} label={t("pipelineNav")} active={activeTab === "pipeline"} onClick={() => { setActiveTab("pipeline"); setIsSidebarOpen(false); }} />
+                        <SidebarItem icon={ShieldCheck} label={t("pipelineNav")} active={activeTab === "pipeline"} onClick={() => { setActiveTab("pipeline"); setIsSidebarOpen(false); }} />
                     )}
                     <SidebarItem icon={Bot} label={t("agentsNav" as any) || "AgentS"} active={activeTab === "agents"} onClick={() => { setActiveTab("agents"); setIsSidebarOpen(false); }} />
                     <SidebarItem icon={Users} label={t("collaboratorsNav")} active={activeTab === "collaborators"} onClick={() => { setActiveTab("collaborators"); setIsSidebarOpen(false); }} />

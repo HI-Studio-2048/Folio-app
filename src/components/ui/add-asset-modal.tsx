@@ -107,7 +107,7 @@ export function AddAssetModal({ isOpen, onClose, onAddAssets, initialStatus }: A
 
     useEffect(() => {
         const timer = setTimeout(async () => {
-            if (addressQuery.length > 4) {
+            if (addressQuery.length >= 3) {
                 try {
                     const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
                     if (!MAPBOX_TOKEN) return;

@@ -1,13 +1,21 @@
 import { NextResponse } from "next/server";
+import { auth } from "@clerk/nextjs/server";
 import { createClient } from "@supabase/supabase-js";
 
 const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
+
+async function requireAdmin() {
+    const { userId, sessionClaims } = await auth();
+    if (!userId) return false;
+    return (sessionClaims?.metadata as any)?.role === "admin";
+}
 
 // GET /api/admin/affiliates  — list all affiliates with stats
 export async function GET(req: Request) {
+    if (!await requireAdmin()) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     try {
         const { data: affiliates, error } = await supabase
             .from("affiliates")
@@ -28,6 +36,7 @@ export async function GET(req: Request) {
 
 // POST /api/admin/affiliates  — create affiliate
 export async function POST(req: Request) {
+    if (!await requireAdmin()) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     try {
         const body = await req.json();
         const { user_id, email, name, tier, payout_email } = body;
